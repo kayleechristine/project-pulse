@@ -157,5 +157,3 @@ The _Project Pulse_ application is released under version 2.0 of the [Apache Lic
 > "This product includes software developed by **Bingyang Wei** under the Apache License, Version 2.0."
 
 Any modifications to the project should be clearly marked, and all copyright and attribution notices should be retained.
-
-
