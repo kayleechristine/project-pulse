@@ -1,36 +1,20 @@
 package main.java.edu.tcu.projectpulse.section;
 
-import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "sections")
-public class Section {
+public class SectionRequest {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false, unique = true)
+    @NotBlank(message = "Section name is required")
     private String sectionName;
 
-    @Column(nullable = false)
+    @NotNull(message = "Start date is required")
     private LocalDate startDate;
 
-    @Column(nullable = false)
+    @NotNull(message = "End date is required")
     private LocalDate endDate;
-
-    public Section() {}
-
-    public Section(String sectionName, LocalDate startDate, LocalDate endDate) {
-        this.sectionName = sectionName;
-        this.startDate = startDate;
-        this.endDate = endDate;
-    }
-
-    public Long getId() {
-        return id;
-    }
 
     public String getSectionName() {
         return sectionName;
