@@ -137,19 +137,37 @@ backend/
     │   ├── repository/
     │   ├── domain/
     │   └── dto/
+    ├── section/
+    │   ├── controller/
+    │   ├── service/
+    │   ├── repository/
+    │   ├── domain/
+    │   └── dto/
+    ├── team/
+    │   ├── controller/
+    │   ├── service/
+    │   ├── repository/
+    │   ├── domain/
+    │   └── dto/
+    ├── war/
+    │   ├── controller/
+    │   ├── service/
+    │   ├── repository/
+    │   ├── domain/
+    │   └── dto/
+    ├── evaluation/
+    │   ├── controller/
+    │   ├── service/
+    │   ├── repository/
+    │   ├── domain/
+    │   └── dto/
     ├── user/
     │   ├── controller/
     │   ├── service/
     │   ├── repository/
     │   ├── domain/
     │   └── dto/
-    ├── project/
-    │   ├── controller/
-    │   ├── service/
-    │   ├── repository/
-    │   ├── domain/
-    │   └── dto/
-    └── requirement/
+    └── report/
         ├── controller/
         ├── service/
         ├── repository/
