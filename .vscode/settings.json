@@ -11,5 +11,6 @@
         "statusBar.debuggingForeground": "#FCFCFE",
         "statusBar.noFolderBackground": "#1E1E5C",
         "statusBar.noFolderForeground": "#FCFCFE"
-    }
+    },
+    "java.configuration.updateBuildConfiguration": "interactive"
 }
