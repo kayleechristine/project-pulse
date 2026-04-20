@@ -12,7 +12,7 @@
 
 ## Response Format
 
-All responses are wrapped in a `Result` object (`team.projectpulse.system.Result`):
+All responses are wrapped in a `Result` object (`com.tcu.projectpulse.shared.Result`):
 
 ```json
 {
@@ -34,7 +34,7 @@ Fields:
 
 ## Status Codes
 
-Defined in `team.projectpulse.system.StatusCode`:
+Defined in `com.tcu.projectpulse.shared.StatusCode`:
 
 | Code | Constant              | Meaning                              |
 |------|-----------------------|--------------------------------------|
@@ -100,7 +100,7 @@ Example response:
 
 ## Authentication
 
-- **Login:** HTTP Basic Auth (username and password)
+- **Login:** `POST /api/auth/login` with a JSON body containing `email` and `password`
 - **Subsequent requests:** JWT token in the `Authorization` header
 
 ```
