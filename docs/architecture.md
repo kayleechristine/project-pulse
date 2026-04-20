@@ -4,7 +4,7 @@
 
 Project Pulse is a full-stack web application built for TCU's Computer Science Senior Design program. It automates the submission and grading of Weekly Activity Reports (WARs) and peer evaluations.
 
-**Stack:** Vue.js + Vuetify (frontend) · Spring Boot 4.x (backend REST API) · MySQL or PostgreSQL (database) · Microsoft Azure (deployment)
+**Stack:** Vue.js + Vuetify (frontend) · Spring Boot 3.3.5 (backend REST API) · MySQL or PostgreSQL (database) · Microsoft Azure (deployment)
 
 ---
 
@@ -24,7 +24,7 @@ flowchart TD
         end
 
         subgraph BE["Backend — Azure App Service"]
-            API["Spring Boot 4.x REST API\nSpring Security · Spring Data JPA\nSpring Mail · Flyway"]
+            API["Spring Boot 3.3.5 REST API\nSpring Security · Spring Data JPA\nSpring Mail · Flyway"]
         end
 
         subgraph DB["Database — Azure Database"]
@@ -103,13 +103,7 @@ sequenceDiagram
 
 ### Backend
 
-Domain-oriented modules with internal layers. Each module contains:
-
-- controller
-- service
-- repository
-- domain
-- dto
+Domain-oriented modules — all classes for a domain live flat in a single package (no sub-package layers). Each module typically contains a controller, service, repository, entity, and any DTOs or enums it needs.
 
 Benefits:
 
@@ -120,59 +114,32 @@ Benefits:
 
 ### Frontend
 
-Organized by feature/domain — feature-specific code grouped together, shared UI and utilities extracted into common folders.
+Organized by role/domain for views (`admin/`, `instructor/`, `student/`) with shared API modules, components, stores, and utilities extracted into their own top-level folders.
 
 ---
 
 ## Backend Structure
 
+Files within each module are flat (no sub-package folders) — all classes for a module live directly inside the module directory.
+
 ```
 backend/
-└── src/main/java/com/tcu/projectpulse/
-    ├── config/
-    ├── shared/
-    ├── auth/
-    │   ├── controller/
-    │   ├── service/
-    │   ├── repository/
-    │   ├── domain/
-    │   └── dto/
-    ├── section/
-    │   ├── controller/
-    │   ├── service/
-    │   ├── repository/
-    │   ├── domain/
-    │   └── dto/
-    ├── team/
-    │   ├── controller/
-    │   ├── service/
-    │   ├── repository/
-    │   ├── domain/
-    │   └── dto/
-    ├── war/
-    │   ├── controller/
-    │   ├── service/
-    │   ├── repository/
-    │   ├── domain/
-    │   └── dto/
-    ├── evaluation/
-    │   ├── controller/
-    │   ├── service/
-    │   ├── repository/
-    │   ├── domain/
-    │   └── dto/
-    ├── user/
-    │   ├── controller/
-    │   ├── service/
-    │   ├── repository/
-    │   ├── domain/
-    │   └── dto/
-    └── report/
-        ├── controller/
-        ├── service/
-        ├── repository/
-        ├── domain/
-        └── dto/
+└── src/main/java/edu/tcu/projectpulse/
+    ├── config/          # CorsConfig, JwtConfig, MailConfig, SecurityConfig
+    ├── exception/       # GlobalExceptionHandler, ResourceNotFoundException, ValidationException
+    ├── auth/            # AuthController, AuthService, JwtTokenProvider
+    ├── activeweek/      # ActiveWeek, ActiveWeekController, ActiveWeekRepository, ActiveWeekService
+    ├── invitation/      # InvitationController, InvitationService, InvitationToken, InvitationTokenRepository
+    ├── peerevaluation/  # PeerEvaluation, PeerEvaluationController, PeerEvaluationRepository, PeerEvaluationService
+    │                    # PeerEvalScore, PeerEvalScoreRepository
+    ├── report/          # ReportController, GradeCalculator, PeerEvalReportService, WarReportService
+    ├── rubric/          # Rubric, RubricController, RubricCriterion, RubricCriterionRepository
+    │                    # RubricRepository, RubricService
+    ├── section/         # Section, SectionController, SectionRepository, SectionRequest
+    ├── team/            # Team, TeamController, TeamMember, TeamMemberRepository, TeamRepository, TeamService
+    ├── user/            # User, UserController, UserRepository, UserRole, UserService
+    └── war/             # WarActivity, WarActivityController, WarActivityRepository, WarActivityService
+                         # ActivityCategory, ActivityStatus
 ```
 
 ---
@@ -230,14 +197,12 @@ Should not be used as persistence entities.
 
 ## Shared Code
 
-Use `shared/` only for:
+Cross-cutting infrastructure lives in dedicated top-level packages rather than a `shared/` folder:
 
-- common exceptions
-- utility classes
-- response wrappers
-- shared validation
+- `exception/` — global exception handler, common exception types
+- `config/` — security, CORS, JWT, mail configuration
 
-Avoid moving code here too early.
+Avoid creating a generic `shared/` or `util/` package; keep utilities close to the module that owns them.
 
 ---
 
@@ -269,17 +234,23 @@ Client → Controller → Service → Repository → Database
 ```
 frontend/
 └── src/
-    ├── router/
-    ├── layouts/
-    ├── shared/
-    │   ├── components/
-    │   ├── services/
-    │   ├── utils/
-    │   └── types/
-    └── features/
-        ├── auth/
-        ├── projects/
-        └── requirements/
+    ├── api/             # Axios API modules: auth, war, peerEval, reports, rubric, sections, teams, users, activeWeeks
+    ├── components/      # Shared UI components: AppNavBar, AppSidebar, ConfirmDialog, DataTable,
+    │                    # PeerEvalForm, PeerEvalScoreTable, ReportTable, RubricCriteriaEditor,
+    │                    # SearchBar, UserInviteForm, WarActivityForm, WarActivityTable
+    ├── layouts/         # AuthLayout, DefaultLayout
+    ├── plugins/         # axios.js (interceptors + base URL), vuetify.js
+    ├── router/          # index.js (route definitions + auth guards)
+    ├── stores/          # Pinia stores: auth, war, peerEval, reports, rubric, sections, teams
+    ├── utils/           # dateUtils.js, gradeUtils.js
+    └── views/
+        ├── admin/       # AdminDashboard, SectionList/Detail/Create, TeamList/Detail/Create,
+        │                # StudentList/Detail, InstructorList/Detail, InviteUsers,
+        │                # RubricCreate, ActiveWeekSetup
+        ├── instructor/  # InstructorDashboard, SectionReport, StudentWarReport,
+        │                # StudentPeerReport, TeamWarReport
+        └── student/     # StudentDashboard, WarView, WarReportView, PeerEvalSubmit,
+                         # PeerEvalReportView, AccountSettings
 ```
 
 ---
