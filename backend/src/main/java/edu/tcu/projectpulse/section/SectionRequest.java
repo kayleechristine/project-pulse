@@ -1,4 +1,4 @@
-package main.java.edu.tcu.projectpulse.section;
+package edu.tcu.projectpulse.section;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

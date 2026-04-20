@@ -1,4 +1,4 @@
-package main.java.edu.tcu.projectpulse.section;
+package edu.tcu.projectpulse.section;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

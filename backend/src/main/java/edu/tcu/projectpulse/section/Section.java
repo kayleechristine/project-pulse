@@ -1,4 +1,4 @@
-package main.java.edu.tcu.projectpulse.section;
+package edu.tcu.projectpulse.section;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
