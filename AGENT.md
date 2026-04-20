@@ -92,7 +92,8 @@ See `/docs/team-workflow.md`
 
 ## Supporting Docs
 
-- Architecture: `/docs/architecture.md`
+- Architecture + diagrams: `/docs/architecture.md`
+- Database schema + ERD: `/docs/database-design.md`
 - Development Plan: `/docs/development-plan.md`
 - Coding Standards: `/docs/coding-standards.md`
 - Decisions (ADRs): `/docs/decisions/`
