@@ -1,16 +1,17 @@
 <p align="center">
   <img src="https://hogwartsartifactsonline.blob.core.windows.net/artifact-image-container/logo.png" alt="Project Pulse Logo" width="400" />
   <br/>
-  <a href="https://github.com/Washingtonwei/project-pulse/actions/workflows/maven-build.yml" style="text-decoration: none;">
-    <img src="https://img.shields.io/github/actions/workflow/status/Washingtonwei/project-pulse/maven-build.yml?logo=apachemaven&label=Maven%20Build" alt="Maven Build Status">
+  <a href="https://github.com/kayleechristine/project-pulse/actions/workflows/ci.yml" style="text-decoration: none;">
+    <img src="https://img.shields.io/github/actions/workflow/status/kayleechristine/project-pulse/ci.yml?logo=apachemaven&label=Maven%20Build" alt="Maven Build Status">
   </a>
-  <a href="https://github.com/Washingtonwei/project-pulse/actions/workflows/azure-webapps-deploy.yml" style="text-decoration: none;">
-    <img src="https://img.shields.io/github/actions/workflow/status/Washingtonwei/project-pulse/azure-webapps-deploy.yml?logo=microsoftazure&label=Azure%20Deployment" alt="Azure Deployment Status">
+  <a href="https://github.com/kayleechristine/project-pulse/actions/workflows/deploy.yml" style="text-decoration: none;">
+    <img src="https://img.shields.io/badge/Azure%20Deployment-TBD-lightgrey?logo=microsoftazure" alt="Azure Deployment Status">
   </a>
-  <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FWashingtonwei%2Fproject-pulse%2Fmain%2Ffrontend%2Fpackage.json&query=%24.dependencies.vue&label=Vue" alt="Vue Version">
-  <img src="https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fraw.githubusercontent.com%2FWashingtonwei%2Fproject-pulse%2Fmain%2Fbackend%2Fpom.xml&query=%2F*%5Blocal-name()%3D'project'%5D%2F*%5Blocal-name()%3D'properties'%5D%2F*%5Blocal-name()%3D'java.version'%5D&label=Java" alt="Java Version">
-  <img src="https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fraw.githubusercontent.com%2FWashingtonwei%2Fproject-pulse%2Fmain%2Fbackend%2Fpom.xml&query=%2F*%5Blocal-name()%3D'project'%5D%2F*%5Blocal-name()%3D'parent'%5D%2F*%5Blocal-name()%3D'version'%5D&label=Spring%20Boot" alt="Spring Boot Version">
-  <img src="https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fraw.githubusercontent.com%2FWashingtonwei%2Fproject-pulse%2Fmain%2Fbackend%2Fpom.xml&query=%2F*%5Blocal-name()%3D'project'%5D%2F*%5Blocal-name()%3D'properties'%5D%2F*%5Blocal-name()%3D'spring-cloud-azure.version'%5D&label=Spring%20Cloud%20Azure" alt="Spring Cloud Azure Version">
+  <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkayleechristine%2Fproject-pulse%2Fmain%2Ffrontend%2Fpackage.json&query=%24.dependencies.vue&label=Vue" alt="Vue Version">
+  <img src="https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkayleechristine%2Fproject-pulse%2Fmain%2Fbackend%2Fpom.xml&query=%2F*%5Blocal-name()%3D'project'%5D%2F*%5Blocal-name()%3D'properties'%5D%2F*%5Blocal-name()%3D'java.version'%5D&label=Java" alt="Java Version">
+  <img src="https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fraw.githubusercontent.com%2Fkayleechristine%2Fproject-pulse%2Fmain%2Fbackend%2Fpom.xml&query=%2F*%5Blocal-name()%3D'project'%5D%2F*%5Blocal-name()%3D'parent'%5D%2F*%5Blocal-name()%3D'version'%5D&label=Spring%20Boot" alt="Spring Boot Version">
+  <img src="https://img.shields.io/badge/Spring%20Security-6.3-green?logo=springsecurity" alt="Spring Security Version">
+  <img src="https://img.shields.io/github/license/kayleechristine/project-pulse" alt="License">
 </p>
 
 **Project Pulse** is a web application designed to support senior design or capstone projects where students work in teams. The goal is to create a structured and transparent environment for students and instructors. By encouraging frequent reporting and peer evaluation, the platform aims to foster collaboration, accountability, and productive team dynamics throughout the project. The web application is available at the following
@@ -88,7 +89,7 @@ Spring Boot, Vue.js, MySQL, Docker, Microsoft Azure, etc.
 ### 1. Clone the repository
 
    ```bash
-   git clone https://github.com/Washingtonwei/project-pulse.git
+   git clone https://github.com/kayleechristine/project-pulse.git
    cd project-pulse
    ```
 ### 2. Start MySQL and Mailpit using Docker Compose
