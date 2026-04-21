@@ -7,16 +7,39 @@ frontend/.vite/
 
 # Maven build output
 backend/target/
+target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+.mvn/wrapper/maven-wrapper.jar
 
 # Environment variables
 .env
 .env.local
 .env.*.local
 
-# IDE
-.vscode/
+# IDE - IntelliJ IDEA
 .idea/
 *.iml
+*.iws
+*.ipr
+
+# IDE - Eclipse / Spring Tools Suite
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# IDE - VS Code
+.vscode/
+
+# IDE - NetBeans
+/nbproject/private/
+/nbbuild/
+/nbdist/
+/.nb-gradle/
 
 # OS
 .DS_Store
