@@ -1,4 +1,4 @@
-﻿package edu.tcu.projectpulse.user;
+package edu.tcu.projectpulse.user;
 
 public enum UserRole {
     ADMIN,
