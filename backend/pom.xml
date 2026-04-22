@@ -83,6 +83,13 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Configuration metadata for IDE property validation -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- MySQL -->
         <dependency>
             <groupId>com.mysql</groupId>
