@@ -8,7 +8,19 @@ spring:
     username: sa
     password:
 
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
+
+  flyway:
+    enabled: false
+
+jwt:
+  secret-key: cHJvamVjdC1wdWxzZS1zZWNyZXQta2V5LWZvci1qd3QtYXV0aGVudGljYXRpb24=
+  token-expiration: 86400000

@@ -1,6 +1,7 @@
 package edu.tcu.projectpulse.user;
 
 import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -20,6 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Table(name = "users")
 public class User implements Serializable {
 
     @Id
