@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import AuthLayout from '../layouts/AuthLayout.vue'
 import MainLayout from '../layouts/MainLayout.vue'
 import LoginView from '../views/LoginView.vue'
+import RegisterView from '../views/RegisterView.vue'
+import StudentDashboard from '../views/student/StudentDashboard.vue'
 import DashboardView from '../views/DashboardView.vue'
 import SectionsView from '../views/admin/SectionsView.vue'
 import SectionDetailView from '../views/admin/SectionDetailView.vue'
@@ -20,6 +22,14 @@ const routes = [
     component: AuthLayout,
     children: [
       { path: 'login', component: LoginView },
+      { path: 'register', component: RegisterView },
+    ],
+  },
+  {
+    path: '/student',
+    component: MainLayout,
+    children: [
+      { path: 'dashboard', component: StudentDashboard },
     ],
   },
   {
