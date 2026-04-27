@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import AuthLayout from '../layouts/AuthLayout.vue'
 import MainLayout from '../layouts/MainLayout.vue'
+import LoginView from '../views/LoginView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import SectionsView from '../views/admin/SectionsView.vue'
 import SectionDetailView from '../views/admin/SectionDetailView.vue'
@@ -12,7 +14,14 @@ import RubricsView from '../views/admin/RubricsView.vue'
 import RubricFormView from '../views/admin/RubricFormView.vue'
 
 const routes = [
-  { path: '/', redirect: '/dashboard' },
+  { path: '/', redirect: '/login' },
+  {
+    path: '/',
+    component: AuthLayout,
+    children: [
+      { path: 'login', component: LoginView },
+    ],
+  },
   {
     path: '/',
     component: MainLayout,
