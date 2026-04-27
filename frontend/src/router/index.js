@@ -1,5 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import AuthLayout from '../layouts/AuthLayout.vue'
 import MainLayout from '../layouts/MainLayout.vue'
+import LoginView from '../views/LoginView.vue'
+import RegisterView from '../views/RegisterView.vue'
+import StudentDashboard from '../views/student/StudentDashboard.vue'
+import AccountSettingsView from '../views/student/AccountSettingsView.vue'
+import PeerEvalSubmitView from '../views/student/PeerEvalSubmitView.vue'
+import PeerEvalReportView from '../views/student/PeerEvalReportView.vue'
 import DashboardView from '../views/DashboardView.vue'
 
 import SectionsView from '../views/admin/SectionsView.vue'
@@ -22,7 +29,25 @@ const PlaceholderView = {
 }
 
 const routes = [
-  { path: '/', redirect: '/dashboard' },
+  { path: '/', redirect: '/login' },
+  {
+    path: '/',
+    component: AuthLayout,
+    children: [
+      { path: 'login', component: LoginView },
+      { path: 'register', component: RegisterView },
+    ],
+  },
+  {
+    path: '/student',
+    component: MainLayout,
+    children: [
+      { path: 'dashboard', component: StudentDashboard },
+      { path: 'account', component: AccountSettingsView },
+      { path: 'peer-eval', component: PeerEvalSubmitView },
+      { path: 'report', component: PeerEvalReportView },
+    ],
+  },
   {
     path: '/',
     component: MainLayout,

@@ -31,7 +31,7 @@ public class InvitationController {
 
     @GetMapping("/validate")
     public Result validateToken(@RequestParam String token) {
-        invitationService.validateToken(token);
-        return new Result(true, StatusCode.SUCCESS, "Token is valid", null);
+        InvitationToken inviteToken = invitationService.validateToken(token);
+        return new Result(true, StatusCode.SUCCESS, "Token is valid", inviteToken.getEmail());
     }
 }
