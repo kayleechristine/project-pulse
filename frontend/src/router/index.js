@@ -7,6 +7,8 @@ import StudentDashboard from '../views/student/StudentDashboard.vue'
 import AccountSettingsView from '../views/student/AccountSettingsView.vue'
 import PeerEvalSubmitView from '../views/student/PeerEvalSubmitView.vue'
 import PeerEvalReportView from '../views/student/PeerEvalReportView.vue'
+import WarView from '../views/student/WarView.vue'
+import WarReportView from '../views/student/WarReportView.vue'
 import DashboardView from '../views/DashboardView.vue'
 
 import SectionsView from '../views/admin/SectionsView.vue'
@@ -46,6 +48,8 @@ const routes = [
       { path: 'account', component: AccountSettingsView },
       { path: 'peer-eval', component: PeerEvalSubmitView },
       { path: 'report', component: PeerEvalReportView },
+      { path: 'war', component: WarView },
+      { path: 'war-report', component: WarReportView },
     ],
   },
   {
