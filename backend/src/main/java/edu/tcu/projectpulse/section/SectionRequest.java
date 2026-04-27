@@ -8,7 +8,7 @@ import java.time.LocalDate;
 public class SectionRequest {
 
     @NotBlank(message = "Section name is required")
-    private String sectionName;
+    private String name;
 
     @NotNull(message = "Start date is required")
     private LocalDate startDate;
@@ -16,12 +16,14 @@ public class SectionRequest {
     @NotNull(message = "End date is required")
     private LocalDate endDate;
 
-    public String getSectionName() {
-        return sectionName;
+    private Long rubricId;
+
+    public String getName() {
+        return name;
     }
 
-    public void setSectionName(String sectionName) {
-        this.sectionName = sectionName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public LocalDate getStartDate() {
@@ -38,5 +40,13 @@ public class SectionRequest {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
+    }
+
+    public Long getRubricId() {
+        return rubricId;
+    }
+
+    public void setRubricId(Long rubricId) {
+        this.rubricId = rubricId;
     }
 }

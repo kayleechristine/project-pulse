@@ -1,6 +1,7 @@
 package edu.tcu.projectpulse.section;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDate;
 
 @Entity
@@ -20,16 +21,28 @@ public class Section {
     @Column(nullable = false)
     private LocalDate endDate;
 
-    public Section() {}
+    private Long rubricId;
 
-    public Section(String sectionName, LocalDate startDate, LocalDate endDate) {
+    public Section() {
+    }
+
+    public Section(String sectionName, LocalDate startDate, LocalDate endDate, Long rubricId) {
         this.sectionName = sectionName;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.rubricId = rubricId;
     }
 
     public Long getId() {
         return id;
+    }
+
+    public String getName() {
+        return sectionName;
+    }
+
+    public void setName(String name) {
+        this.sectionName = name;
     }
 
     public String getSectionName() {
@@ -54,5 +67,13 @@ public class Section {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
+    }
+
+    public Long getRubricId() {
+        return rubricId;
+    }
+
+    public void setRubricId(Long rubricId) {
+        this.rubricId = rubricId;
     }
 }

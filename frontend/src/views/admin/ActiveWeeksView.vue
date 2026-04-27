@@ -34,22 +34,31 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
-import { getSectionById } from '../../data/mockAdminData'
+import { computed, ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { getSection } from '../../api/sections'
+import { saveActiveWeeks } from '../../api/activeWeeks'
 
-const props = defineProps({
-  id: String,
-})
+const route = useRoute()
 
-const section = computed(() => getSectionById(props.id))
-const selectedInactiveWeeks = ref(section.value?.inactiveWeeks ? [...section.value.inactiveWeeks] : [])
+const section = ref(null)
+const selectedInactiveWeeks = ref([])
+
+async function loadSection() {
+  try {
+    section.value = await getSection(route.params.id)
+    selectedInactiveWeeks.value = section.value.inactiveWeeks ?? []
+  } catch (err) {
+    alert(err.message)
+  }
+}
 
 const generatedWeeks = computed(() => {
   if (!section.value) return []
 
   const weeks = []
-  const start = new Date(`${section.value.startDate}T00:00:00`)
-  const end = new Date(`${section.value.endDate}T00:00:00`)
+  const start = new Date(section.value.startDate)
+  const end = new Date(section.value.endDate)
   const current = new Date(start)
 
   while (current <= end) {
@@ -61,10 +70,17 @@ const generatedWeeks = computed(() => {
 })
 
 function formatDate(date) {
-  return new Date(`${date}T00:00:00`).toLocaleDateString()
+  return new Date(date).toLocaleDateString()
 }
 
-function saveWeeks() {
-  alert('Active weeks saved (mock only).')
+async function saveWeeks() {
+  try {
+    await saveActiveWeeks(route.params.id, selectedInactiveWeeks.value)
+    alert('Active weeks saved successfully')
+  } catch (err) {
+    alert(err.message)
+  }
 }
+
+onMounted(loadSection)
 </script>

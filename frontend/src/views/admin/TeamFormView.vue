@@ -63,46 +63,71 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { sections, teams, getTeamById } from '../../data/mockAdminData'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { getTeam, createTeam, updateTeam } from '../../api/teams'
+import { getSections } from '../../api/sections'
 
-const props = defineProps({
-  id: String,
-})
-
+const route = useRoute()
 const router = useRouter()
-const isEdit = computed(() => !!props.id)
-const existing = computed(() => isEdit.value ? getTeamById(props.id) : null)
-const sectionOptions = sections
+
+const isEdit = computed(() => !!route.params.id)
+const sectionOptions = ref([])
 const error = ref('')
 
 const form = ref({
-  sectionId: existing.value?.sectionId ?? null,
-  name: existing.value?.name ?? '',
-  description: existing.value?.description ?? '',
-  websiteUrl: existing.value?.websiteUrl ?? '',
+  sectionId: null,
+  name: '',
+  description: '',
+  websiteUrl: '',
 })
 
-function saveTeam() {
+async function loadData() {
+  try {
+    sectionOptions.value = await getSections()
+
+    if (isEdit.value) {
+      const team = await getTeam(route.params.id)
+
+      form.value = {
+        sectionId: team.sectionId ?? team.section?.id ?? null,
+        name: team.name ?? '',
+        description: team.description ?? '',
+        websiteUrl: team.websiteUrl ?? '',
+      }
+    }
+  } catch (err) {
+    error.value = err.message
+  }
+}
+
+async function saveTeam() {
   error.value = ''
 
-  if (!form.value.sectionId || !form.value.name || !form.value.description || !form.value.websiteUrl) {
-    error.value = 'Please complete all fields.'
+  if (!form.value.sectionId) {
+    error.value = 'Section is required.'
     return
   }
 
-  const duplicate = teams.find(team =>
-    team.name.toLowerCase() === form.value.name.toLowerCase() &&
-    team.id !== existing.value?.id
-  )
-
-  if (duplicate) {
-    error.value = 'Team name must be unique.'
+  if (!form.value.name) {
+    error.value = 'Team name is required.'
     return
   }
 
-  alert(isEdit.value ? 'Team updated (mock only).' : 'Team created (mock only).')
-  router.push('/teams')
+  try {
+    if (isEdit.value) {
+      await updateTeam(route.params.id, form.value)
+      alert('Team updated successfully')
+    } else {
+      await createTeam(form.value)
+      alert('Team created successfully')
+    }
+
+    router.push('/teams')
+  } catch (err) {
+    error.value = err.message
+  }
 }
+
+onMounted(loadData)
 </script>

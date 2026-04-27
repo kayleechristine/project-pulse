@@ -9,7 +9,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/sections")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174"})
 public class SectionController {
 
     private final SectionRepository sectionRepository;
@@ -23,24 +23,56 @@ public class SectionController {
         return sectionRepository.findAll();
     }
 
+    @GetMapping("/{id}")
+    public Section getSection(@PathVariable Long id) {
+        return sectionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Section not found"));
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Section createSection(@Valid @RequestBody SectionRequest request) {
-        if (request.getEndDate().isBefore(request.getStartDate())) {
-            throw new IllegalArgumentException("End date cannot be before start date");
-        }
+        validateDates(request);
 
-        if (sectionRepository.findBySectionName(request.getSectionName()).isPresent()) {
+        if (sectionRepository.findBySectionNameIgnoreCase(request.getName()).isPresent()) {
             throw new IllegalArgumentException("Section name already exists");
         }
 
         Section section = new Section(
-                request.getSectionName().trim(),
+                request.getName().trim(),
                 request.getStartDate(),
-                request.getEndDate()
+                request.getEndDate(),
+                request.getRubricId()
         );
 
         return sectionRepository.save(section);
+    }
+
+    @PutMapping("/{id}")
+    public Section updateSection(@PathVariable Long id, @Valid @RequestBody SectionRequest request) {
+        validateDates(request);
+
+        Section section = sectionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Section not found"));
+
+        sectionRepository.findBySectionNameIgnoreCase(request.getName()).ifPresent(existing -> {
+            if (!existing.getId().equals(id)) {
+                throw new IllegalArgumentException("Section name already exists");
+            }
+        });
+
+        section.setName(request.getName().trim());
+        section.setStartDate(request.getStartDate());
+        section.setEndDate(request.getEndDate());
+        section.setRubricId(request.getRubricId());
+
+        return sectionRepository.save(section);
+    }
+
+    private void validateDates(SectionRequest request) {
+        if (request.getEndDate().isBefore(request.getStartDate())) {
+            throw new IllegalArgumentException("End date cannot be before start date");
+        }
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="d-flex flex-wrap align-center justify-space-between mb-6 ga-3">
+    <div class="d-flex justify-space-between align-center mb-6">
       <div>
         <div class="text-h3 font-weight-bold">Rubrics</div>
         <div class="text-h6 text-medium-emphasis">
@@ -8,31 +8,58 @@
         </div>
       </div>
 
-      <v-btn color="primary" prepend-icon="mdi-plus" to="/rubrics/new">
+      <v-btn color="primary" to="/rubrics/new" prepend-icon="mdi-plus">
         Create Rubric
       </v-btn>
     </div>
 
+    <v-alert v-if="error" type="error" variant="tonal" class="mb-4">
+      {{ error }}
+    </v-alert>
+
     <v-row>
-      <v-col cols="12" md="6" v-for="rubric in rubrics" :key="rubric.id">
-        <v-card rounded="xl" elevation="1" class="pa-5 h-100">
-          <div class="d-flex justify-space-between align-center mb-3">
-            <div class="text-h5 font-weight-bold">{{ rubric.name }}</div>
-            <v-btn variant="outlined" size="small" :to="`/rubrics/${rubric.id}/edit`">Edit</v-btn>
+      <v-col
+        v-for="rubric in rubrics"
+        :key="rubric.id"
+        cols="12"
+        md="6"
+      >
+        <v-card rounded="xl" elevation="1" class="pa-6">
+          <div class="d-flex justify-space-between align-start mb-4">
+            <div>
+              <div class="text-h5 font-weight-bold">{{ rubric.name }}</div>
+              <div class="text-body-1 text-medium-emphasis">
+                {{ rubric.criteria?.length || 0 }} criteria
+              </div>
+            </div>
+
+            <v-btn
+              variant="outlined"
+              size="small"
+              :to="`/rubrics/${rubric.id}/edit`"
+            >
+              Edit
+            </v-btn>
           </div>
 
-          <div class="text-body-1 mb-3">
-            {{ rubric.criteria.length }} criteria
+          <div
+            v-for="criterion in rubric.criteria"
+            :key="criterion.id"
+            class="mb-3"
+          >
+            <div class="font-weight-medium">
+              {{ criterion.name }}
+            </div>
+            <div class="text-body-2 text-medium-emphasis">
+              {{ criterion.description }} (Max: {{ criterion.maxScore }})
+            </div>
           </div>
+        </v-card>
+      </v-col>
 
-          <v-list density="compact">
-            <v-list-item
-              v-for="criterion in rubric.criteria"
-              :key="criterion.id"
-              :title="criterion.name"
-              :subtitle="`${criterion.description} (Max: ${criterion.maxScore})`"
-            />
-          </v-list>
+      <v-col v-if="rubrics.length === 0" cols="12">
+        <v-card rounded="xl" elevation="1" class="pa-6 text-center text-medium-emphasis">
+          No rubrics found. Create one to get started.
         </v-card>
       </v-col>
     </v-row>
@@ -40,5 +67,19 @@
 </template>
 
 <script setup>
-import { rubrics } from '../../data/mockAdminData'
+import { onMounted, ref } from 'vue'
+import { getRubrics } from '../../api/rubric'
+
+const rubrics = ref([])
+const error = ref('')
+
+async function loadRubrics() {
+  try {
+    rubrics.value = await getRubrics()
+  } catch (err) {
+    error.value = err.message
+  }
+}
+
+onMounted(loadRubrics)
 </script>

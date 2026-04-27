@@ -50,52 +50,76 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { sections, rubrics, getSectionById } from '../../data/mockAdminData'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { getSection, createSection, updateSection } from '../../api/sections'
+import { getRubrics } from '../../api/rubric'
 
-const props = defineProps({
-  id: String,
-})
-
+const route = useRoute()
 const router = useRouter()
-const isEdit = computed(() => !!props.id)
-const existing = computed(() => isEdit.value ? getSectionById(props.id) : null)
 
-const rubricOptions = rubrics
+const isEdit = computed(() => !!route.params.id)
 const error = ref('')
+const rubricOptions = ref([])
 
 const form = ref({
-  name: existing.value?.name ?? '',
-  startDate: existing.value?.startDate ?? '',
-  endDate: existing.value?.endDate ?? '',
-  rubricId: existing.value?.rubricId ?? null,
+  name: '',
+  startDate: '',
+  endDate: '',
+  rubricId: null,
 })
 
-function saveSection() {
+async function loadData() {
+  try {
+    rubricOptions.value = await getRubrics()
+
+    if (isEdit.value) {
+      const section = await getSection(route.params.id)
+
+      form.value = {
+        name: section.name ?? '',
+        startDate: section.startDate ?? '',
+        endDate: section.endDate ?? '',
+        rubricId: section.rubricId ?? section.rubric?.id ?? null,
+      }
+    }
+  } catch (err) {
+    error.value = err.message
+  }
+}
+
+async function saveSection() {
   error.value = ''
 
-  if (!form.value.name || !form.value.startDate || !form.value.endDate || !form.value.rubricId) {
-    error.value = 'Please complete all fields.'
+  if (!form.value.name) {
+    error.value = 'Section name is required.'
     return
   }
 
-  if (form.value.startDate > form.value.endDate) {
-    error.value = 'Start date cannot be after end date.'
+  if (!form.value.startDate || !form.value.endDate) {
+    error.value = 'Start date and end date are required.'
     return
   }
 
-  const duplicate = sections.find(section =>
-    section.name.toLowerCase() === form.value.name.toLowerCase() &&
-    section.id !== existing.value?.id
-  )
-
-  if (duplicate) {
-    error.value = 'Section name must be unique.'
+  if (!form.value.rubricId) {
+    error.value = 'Rubric is required.'
     return
   }
 
-  alert(isEdit.value ? 'Section updated (mock only).' : 'Section created (mock only).')
-  router.push('/sections')
+  try {
+    if (isEdit.value) {
+      await updateSection(route.params.id, form.value)
+      alert('Section updated successfully')
+    } else {
+      await createSection(form.value)
+      alert('Section created successfully')
+    }
+
+    router.push('/sections')
+  } catch (err) {
+    error.value = err.message
+  }
 }
+
+onMounted(loadData)
 </script>

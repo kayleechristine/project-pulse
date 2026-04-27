@@ -48,7 +48,12 @@
               <v-text-field v-model="criterion.description" label="Description" variant="outlined" />
             </v-col>
             <v-col cols="12" md="2">
-              <v-text-field v-model.number="criterion.maxScore" type="number" label="Max Score" variant="outlined" />
+              <v-text-field
+                v-model.number="criterion.maxScore"
+                type="number"
+                label="Max Score"
+                variant="outlined"
+              />
             </v-col>
           </v-row>
         </v-card>
@@ -71,7 +76,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { rubrics, getRubricById } from '../../data/mockAdminData'
+import { createRubric } from '../../api/rubric'
 
 const props = defineProps({
   id: String,
@@ -79,16 +84,13 @@ const props = defineProps({
 
 const router = useRouter()
 const isEdit = computed(() => !!props.id)
-const existing = computed(() => isEdit.value ? getRubricById(props.id) : null)
 const error = ref('')
 
 const form = ref({
-  name: existing.value?.name ?? '',
-  criteria: existing.value?.criteria
-    ? JSON.parse(JSON.stringify(existing.value.criteria))
-    : [
-        { name: '', description: '', maxScore: 10 },
-      ],
+  name: '',
+  criteria: [
+    { name: '', description: '', maxScore: 10 },
+  ],
 })
 
 function addCriterion() {
@@ -103,21 +105,11 @@ function removeCriterion(index) {
   form.value.criteria.splice(index, 1)
 }
 
-function saveRubric() {
+async function saveRubric() {
   error.value = ''
 
   if (!form.value.name) {
     error.value = 'Rubric name is required.'
-    return
-  }
-
-  const duplicate = rubrics.find(r =>
-    r.name.toLowerCase() === form.value.name.toLowerCase() &&
-    r.id !== existing.value?.id
-  )
-
-  if (duplicate) {
-    error.value = 'Rubric name must be unique.'
     return
   }
 
@@ -138,7 +130,12 @@ function saveRubric() {
     }
   }
 
-  alert(isEdit.value ? 'Rubric updated (mock only).' : 'Rubric created (mock only).')
-  router.push('/rubrics')
+  try {
+    await createRubric(form.value)
+    alert('Rubric saved successfully')
+    router.push('/rubrics')
+  } catch (err) {
+    error.value = err.message
+  }
 }
 </script>
