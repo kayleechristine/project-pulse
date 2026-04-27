@@ -20,7 +20,7 @@
         <v-card variant="outlined" rounded="lg" :to="'/student/peer-eval'">
           <v-card-item>
             <template #prepend>
-              <v-icon icon="mdi-account-star-outline" color="primary" size="28" />
+              <v-icon icon="mdi-message-star-outline" color="primary" size="28" />
             </template>
             <v-card-title>Peer Evaluation</v-card-title>
             <v-card-subtitle>Evaluate your teammates</v-card-subtitle>
@@ -32,7 +32,7 @@
         <v-card variant="outlined" rounded="lg" :to="'/student/report'">
           <v-card-item>
             <template #prepend>
-              <v-icon icon="mdi-chart-bar-outline" color="primary" size="28" />
+              <v-icon icon="mdi-file-chart-outline" color="primary" size="28" />
             </template>
             <v-card-title>My Report</v-card-title>
             <v-card-subtitle>View your peer evaluation scores</v-card-subtitle>
