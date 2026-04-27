@@ -4,6 +4,7 @@ import MainLayout from '../layouts/MainLayout.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import StudentDashboard from '../views/student/StudentDashboard.vue'
+import AccountSettingsView from '../views/student/AccountSettingsView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import SectionsView from '../views/admin/SectionsView.vue'
 import SectionDetailView from '../views/admin/SectionDetailView.vue'
@@ -30,6 +31,7 @@ const routes = [
     component: MainLayout,
     children: [
       { path: 'dashboard', component: StudentDashboard },
+      { path: 'account', component: AccountSettingsView },
     ],
   },
   {
