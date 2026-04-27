@@ -5,6 +5,8 @@ import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import StudentDashboard from '../views/student/StudentDashboard.vue'
 import AccountSettingsView from '../views/student/AccountSettingsView.vue'
+import PeerEvalSubmitView from '../views/student/PeerEvalSubmitView.vue'
+import PeerEvalReportView from '../views/student/PeerEvalReportView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import SectionsView from '../views/admin/SectionsView.vue'
 import SectionDetailView from '../views/admin/SectionDetailView.vue'
@@ -32,6 +34,8 @@ const routes = [
     children: [
       { path: 'dashboard', component: StudentDashboard },
       { path: 'account', component: AccountSettingsView },
+      { path: 'peer-eval', component: PeerEvalSubmitView },
+      { path: 'report', component: PeerEvalReportView },
     ],
   },
   {
