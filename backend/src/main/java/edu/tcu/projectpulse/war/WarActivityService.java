@@ -22,7 +22,7 @@ public class WarActivityService {
 
     @Transactional
     public WarActivity add(Integer studentId, WarActivityRequest request) {
-        // TODO: validate weekId is an active week and not in the future (needs ActiveWeekRepository — Leiton)
+        // TODO: validate weekId is an active week and not in the future (needs ActiveWeekRepository)
 
         WarActivity activity = new WarActivity();
         activity.setStudentId(studentId);

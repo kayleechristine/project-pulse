@@ -18,7 +18,7 @@ public class WarReportService {
     }
 
     public Map<String, Object> buildTeamWarReport(Integer teamId, Integer weekId) {
-        // TODO: replace stub with real team member lookup (needs TeamMemberRepository — Leiton)
+        // TODO: replace stub with real team member lookup (needs TeamMemberRepository)
         List<Integer> teamMemberIds = List.of();
 
         List<Map<String, Object>> entries = teamMemberIds.stream()
