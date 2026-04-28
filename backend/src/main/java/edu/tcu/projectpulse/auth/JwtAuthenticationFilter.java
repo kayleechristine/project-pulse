@@ -4,7 +4,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -41,7 +43,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (jwtTokenProvider.isTokenValid(token)) {
             String email = jwtTokenProvider.getEmailFromToken(token);
-            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
+            if (email != null && (existingAuth == null || existingAuth instanceof AnonymousAuthenticationToken)) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities()
