@@ -1,5 +1,5 @@
 <template>
-  <v-card variant="outlined" rounded="lg">
+  <v-card rounded="lg">
     <v-card-title class="pa-4 pb-2">{{ activity ? 'Edit Activity' : 'Add Activity' }}</v-card-title>
     <v-card-text class="pa-4 pt-2">
       <v-alert v-if="error" type="error" variant="tonal" class="mb-4" closable @click:close="error = ''">

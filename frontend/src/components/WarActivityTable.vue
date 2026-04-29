@@ -4,10 +4,10 @@
       <tr>
         <th>Category</th>
         <th>Description</th>
-        <th>Planned Hrs</th>
-        <th>Actual Hrs</th>
+        <th>Planned Hours</th>
+        <th>Actual Hours</th>
         <th>Status</th>
-        <th></th>
+        <th style="width: 96px">Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -17,12 +17,16 @@
         </td>
       </tr>
       <tr v-for="activity in activities" :key="activity.id">
-        <td>{{ categoryLabel(activity.category) }}</td>
+        <td>
+          <v-chip :color="categoryColor(activity.category)" size="small" variant="tonal">
+            {{ categoryLabel(activity.category) }}
+          </v-chip>
+        </td>
         <td>{{ activity.description }}</td>
         <td>{{ activity.plannedHours }}</td>
         <td>{{ activity.actualHours ?? '—' }}</td>
         <td>{{ statusLabel(activity.status) }}</td>
-        <td>
+        <td style="width: 96px; white-space: nowrap">
           <v-btn icon size="small" variant="text" @click="$emit('edit', activity)">
             <v-icon icon="mdi-pencil-outline" />
           </v-btn>
@@ -49,6 +53,20 @@ const CATEGORY_LABELS = {
   SUPPORT: 'Support', MISCELLANEOUS: 'Miscellaneous',
 }
 
+const CATEGORY_COLORS = {
+  DEVELOPMENT: 'blue',
+  TESTING: 'teal',
+  BUGFIX: 'red',
+  COMMUNICATION: 'cyan',
+  DOCUMENTATION: 'purple',
+  DESIGN: 'pink',
+  PLANNING: 'indigo',
+  LEARNING: 'green',
+  DEPLOYMENT: 'orange',
+  SUPPORT: 'amber',
+  MISCELLANEOUS: 'grey',
+}
+
 const STATUS_LABELS = {
   IN_PROGRESS: 'In Progress',
   UNDER_TESTING: 'Under Testing',
@@ -56,5 +74,6 @@ const STATUS_LABELS = {
 }
 
 function categoryLabel(val) { return CATEGORY_LABELS[val] ?? val }
+function categoryColor(val) { return CATEGORY_COLORS[val] ?? 'grey' }
 function statusLabel(val) { return STATUS_LABELS[val] ?? val }
 </script>
