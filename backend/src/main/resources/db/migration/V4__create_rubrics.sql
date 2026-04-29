@@ -6,7 +6,7 @@ CREATE TABLE rubrics (
 );
 
 CREATE TABLE rubric_criteria (
-    id          BIGINT       NOT NULL AUTO_INCREMENT,
+    id          INT          NOT NULL AUTO_INCREMENT,
     name        VARCHAR(255),
     description VARCHAR(255),
     max_score   DOUBLE,
