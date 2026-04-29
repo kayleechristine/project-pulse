@@ -21,6 +21,7 @@ import RubricsView from '../views/admin/RubricsView.vue'
 import RubricFormView from '../views/admin/RubricFormView.vue'
 import ActiveWeeksView from '../views/admin/ActiveWeeksView.vue'
 import InviteStudentView from '../views/admin/InviteStudentView.vue'
+import StudentsView from '../views/admin/StudentsView.vue'
 
 const PlaceholderView = {
   template: `
@@ -73,7 +74,8 @@ const routes = [
       { path: 'rubrics', component: RubricsView },
       { path: 'rubrics/new', component: RubricFormView },
 
-      { path: 'students', component: InviteStudentView },
+      { path: 'students', component: StudentsView },
+      { path: 'students/invite', component: InviteStudentView },
       { path: 'reports', component: PlaceholderView }
     ]
   }
