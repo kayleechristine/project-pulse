@@ -29,7 +29,6 @@
       <v-app-bar-nav-icon @click="drawer = !drawer" />
       <v-toolbar-title class="font-weight-bold">Project Pulse</v-toolbar-title>
       <v-spacer />
-      <v-btn variant="text" prepend-icon="mdi-bell-outline">Notifications</v-btn>
       <v-btn variant="text" prepend-icon="mdi-account-circle-outline">Profile</v-btn>
     </v-app-bar>
 
