@@ -1,19 +1,26 @@
 package edu.tcu.projectpulse.war;
 
+import edu.tcu.projectpulse.activeweek.ActiveWeek;
+import edu.tcu.projectpulse.activeweek.ActiveWeekRepository;
 import edu.tcu.projectpulse.exception.ResourceNotFoundException;
+import edu.tcu.projectpulse.exception.ValidationException;
 import edu.tcu.projectpulse.war.dto.WarActivityRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
 public class WarActivityService {
 
     private final WarActivityRepository warActivityRepository;
+    private final ActiveWeekRepository activeWeekRepository;
 
-    public WarActivityService(WarActivityRepository warActivityRepository) {
+    public WarActivityService(WarActivityRepository warActivityRepository,
+                               ActiveWeekRepository activeWeekRepository) {
         this.warActivityRepository = warActivityRepository;
+        this.activeWeekRepository = activeWeekRepository;
     }
 
     public List<WarActivity> getActivities(Integer studentId, Integer weekId) {
@@ -22,7 +29,15 @@ public class WarActivityService {
 
     @Transactional
     public WarActivity add(Integer studentId, WarActivityRequest request) {
-        // TODO: validate weekId is an active week and not in the future (needs ActiveWeekRepository)
+        ActiveWeek week = activeWeekRepository.findById(request.getWeekId())
+                .orElseThrow(() -> new ResourceNotFoundException("ActiveWeek", "id", request.getWeekId()));
+
+        if (!week.isActive()) {
+            throw new ValidationException("Week " + request.getWeekId() + " is not an active week");
+        }
+        if (week.getWeekStart().isAfter(LocalDate.now())) {
+            throw new ValidationException("Cannot submit activities for a future week");
+        }
 
         WarActivity activity = new WarActivity();
         activity.setStudentId(studentId);
