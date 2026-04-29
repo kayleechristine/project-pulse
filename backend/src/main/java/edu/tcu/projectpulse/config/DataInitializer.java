@@ -2,6 +2,9 @@ package edu.tcu.projectpulse.config;
 
 import edu.tcu.projectpulse.activeweek.ActiveWeek;
 import edu.tcu.projectpulse.activeweek.ActiveWeekRepository;
+import edu.tcu.projectpulse.peerevaluation.PeerEvalScore;
+import edu.tcu.projectpulse.peerevaluation.PeerEvaluation;
+import edu.tcu.projectpulse.peerevaluation.PeerEvaluationRepository;
 import edu.tcu.projectpulse.rubric.Rubric;
 import edu.tcu.projectpulse.rubric.RubricCriterion;
 import edu.tcu.projectpulse.rubric.RubricRepository;
@@ -18,6 +21,7 @@ import edu.tcu.projectpulse.war.WarActivity;
 import edu.tcu.projectpulse.war.WarActivityRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -35,6 +39,7 @@ public class DataInitializer implements CommandLineRunner {
     private final ActiveWeekRepository activeWeekRepository;
     private final RubricRepository rubricRepository;
     private final WarActivityRepository warActivityRepository;
+    private final PeerEvaluationRepository peerEvaluationRepository;
 
     public DataInitializer(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
@@ -42,7 +47,8 @@ public class DataInitializer implements CommandLineRunner {
                            TeamRepository teamRepository,
                            ActiveWeekRepository activeWeekRepository,
                            RubricRepository rubricRepository,
-                           WarActivityRepository warActivityRepository) {
+                           WarActivityRepository warActivityRepository,
+                           PeerEvaluationRepository peerEvaluationRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.sectionRepository = sectionRepository;
@@ -50,9 +56,11 @@ public class DataInitializer implements CommandLineRunner {
         this.activeWeekRepository = activeWeekRepository;
         this.rubricRepository = rubricRepository;
         this.warActivityRepository = warActivityRepository;
+        this.peerEvaluationRepository = peerEvaluationRepository;
     }
 
     @Override
+    @Transactional
     public void run(String... args) {
         seedUsers();
         Section section = seedSection();
@@ -60,6 +68,7 @@ public class DataInitializer implements CommandLineRunner {
         seedRubric(section);
         seedTeam(section);
         seedWarActivities(weeks);
+        seedPeerEvaluations(weeks);
     }
 
     private void seedUsers() {
@@ -78,6 +87,18 @@ public class DataInitializer implements CommandLineRunner {
         seedStudent("jimbo@tcu.edu", "Jimothy", "Jimmerson");
         seedStudent("bobinator@tcu.edu", "Bobert", "McBob");
         seedStudent("timtam@tcu.edu", "Timantha", "Tamothy");
+
+        if (userRepository.findByEmail("prof@tcu.edu").isEmpty()) {
+            User instructor = new User();
+            instructor.setEmail("prof@tcu.edu");
+            instructor.setFirstName("Professor");
+            instructor.setLastName("Smith");
+            instructor.setPassword(passwordEncoder.encode("password123"));
+            instructor.setEnabled(true);
+            instructor.setAccountStatus(User.AccountStatus.ACTIVE);
+            instructor.addRole(UserRole.INSTRUCTOR);
+            userRepository.save(instructor);
+        }
     }
 
     private void seedStudent(String email, String firstName, String lastName) {
@@ -222,6 +243,53 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
+    private void seedPeerEvaluations(List<ActiveWeek> weeks) {
+        if (peerEvaluationRepository.count() > 0 || weeks.size() < 4) return;
+
+        Integer jimothy  = userRepository.findByEmail("jimbo@tcu.edu").map(User::getId).orElse(null);
+        Integer bobert   = userRepository.findByEmail("bobinator@tcu.edu").map(User::getId).orElse(null);
+        Integer timantha = userRepository.findByEmail("timtam@tcu.edu").map(User::getId).orElse(null);
+        if (jimothy == null || bobert == null || timantha == null) return;
+
+        List<RubricCriterion> criteria = rubricRepository.findByNameIgnoreCase("Peer Evaluation Rubric")
+                .map(Rubric::getCriteria).orElse(List.of());
+        if (criteria.isEmpty()) return;
+
+        for (int i = 0; i < 4; i++) {
+            Integer weekId = weeks.get(i).getId().intValue();
+            peerEvaluationRepository.saveAll(List.of(
+                eval(jimothy,  bobert,   weekId, criteria, new int[]{9, 8, 9, 8, 9, 8}, "Great work this sprint.", null),
+                eval(jimothy,  timantha, weekId, criteria, new int[]{8, 9, 8, 9, 8, 9}, "Very thorough documentation.", null),
+                eval(bobert,   jimothy,  weekId, criteria, new int[]{9, 9, 8, 9, 9, 8}, "Always delivers on time.", null),
+                eval(bobert,   timantha, weekId, criteria, new int[]{8, 8, 9, 8, 8, 9}, "Great communicator.", null),
+                eval(timantha, jimothy,  weekId, criteria, new int[]{9, 8, 9, 9, 8, 9}, "Strong technical skills.", null),
+                eval(timantha, bobert,   weekId, criteria, new int[]{8, 9, 8, 8, 9, 8}, "Good team player.", null)
+            ));
+        }
+    }
+
+    private PeerEvaluation eval(Integer evaluatorId, Integer evaluateeId, Integer weekId,
+                                List<RubricCriterion> criteria, int[] scores,
+                                String publicComment, String privateComment) {
+        PeerEvaluation e = new PeerEvaluation();
+        e.setEvaluatorId(evaluatorId);
+        e.setEvaluateeId(evaluateeId);
+        e.setWeekId(weekId);
+        e.setPublicComments(publicComment);
+        e.setPrivateComments(privateComment);
+        e.setSubmittedAt(java.time.Instant.now());
+        List<PeerEvalScore> scoreList = new ArrayList<>();
+        for (int i = 0; i < criteria.size() && i < scores.length; i++) {
+            PeerEvalScore s = new PeerEvalScore();
+            s.setEvaluation(e);
+            s.setCriterionId(criteria.get(i).getId().intValue());
+            s.setScore(scores[i]);
+            scoreList.add(s);
+        }
+        e.setScores(scoreList);
+        return e;
+    }
+
     private RubricCriterion criterion(String name, double maxScore) {
         RubricCriterion c = new RubricCriterion();
         c.setName(name);
@@ -232,14 +300,16 @@ public class DataInitializer implements CommandLineRunner {
 
     private void seedTeam(Section section) {
         if (teamRepository.findByNameIgnoreCase("Team One").isEmpty()) {
-            Integer jimothy = userRepository.findByEmail("jimbo@tcu.edu").map(User::getId).orElse(null);
-            Integer bobert  = userRepository.findByEmail("bobinator@tcu.edu").map(User::getId).orElse(null);
+            Integer jimothy  = userRepository.findByEmail("jimbo@tcu.edu").map(User::getId).orElse(null);
+            Integer bobert   = userRepository.findByEmail("bobinator@tcu.edu").map(User::getId).orElse(null);
             Integer timantha = userRepository.findByEmail("timtam@tcu.edu").map(User::getId).orElse(null);
+            Integer prof     = userRepository.findByEmail("prof@tcu.edu").map(User::getId).orElse(null);
 
             Team team = new Team();
             team.setName("Team One");
             team.setSectionId(section.getId());
             team.setStudentIds(Set.of(jimothy, bobert, timantha));
+            if (prof != null) team.getInstructorIds().add(prof);
             teamRepository.save(team);
         }
     }
