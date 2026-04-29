@@ -1,3 +1,5 @@
+import api from '../plugins/axios'
+
 const TEAM_API_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/teams`
 
 function authHeaders(extra = {}) {
@@ -57,14 +59,8 @@ export async function deleteTeam(id) {
   return handleResponse(response, 'Failed to delete team')
 }
 
-export async function getMyTeam() {
-  return {
-    id: 1,
-    name: 'Demo Team',
-    description: 'Senior design project team',
-    websiteUrl: 'https://example.com',
-    studentIds: [],
-  }
+export function getMyTeam() {
+  return api.get('/api/teams/my-team')
 }
 
 export async function assignStudentsToTeam(teamId, studentIds) {
