@@ -70,7 +70,7 @@ class PeerEvaluationServiceTest {
         activeWeek.setActive(true);
 
         lenient().when(teamRepository.findByStudentId(1)).thenReturn(Optional.of(team));
-        lenient().when(activeWeekRepository.findById(1L)).thenReturn(Optional.of(activeWeek));
+        lenient().when(activeWeekRepository.findById(1)).thenReturn(Optional.of(activeWeek));
     }
 
     @Test
@@ -163,7 +163,7 @@ class PeerEvaluationServiceTest {
 
     @Test
     void should_ThrowValidationException_When_WeekDoesNotExist() {
-        given(activeWeekRepository.findById(1L)).willReturn(Optional.empty());
+        given(activeWeekRepository.findById(1)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> peerEvalService.submit(1, request))
                 .isInstanceOf(ValidationException.class)
