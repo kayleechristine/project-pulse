@@ -40,7 +40,7 @@ public class PeerEvaluationService {
             throw new ValidationException("You can only evaluate members of your own team.");
         }
 
-        ActiveWeek week = activeWeekRepository.findById(Long.valueOf(request.getWeekId()))
+        ActiveWeek week = activeWeekRepository.findById(request.getWeekId())
                 .orElseThrow(() -> new ValidationException("The specified week does not exist."));
         if (!week.isActive()) {
             throw new ValidationException("Peer evaluations can only be submitted for active weeks.");

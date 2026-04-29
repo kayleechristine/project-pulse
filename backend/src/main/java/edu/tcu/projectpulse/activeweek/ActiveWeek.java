@@ -9,7 +9,7 @@ public class ActiveWeek {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     private Long sectionId;
 
@@ -19,7 +19,7 @@ public class ActiveWeek {
 
     private boolean active;
 
-    public Long getId() { return id; }
+    public Integer getId() { return id; }
 
     public Long getSectionId() { return sectionId; }
     public void setSectionId(Long sectionId) { this.sectionId = sectionId; }

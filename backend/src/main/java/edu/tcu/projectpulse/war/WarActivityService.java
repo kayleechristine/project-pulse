@@ -29,7 +29,7 @@ public class WarActivityService {
 
     @Transactional
     public WarActivity add(Integer studentId, WarActivityRequest request) {
-        ActiveWeek week = activeWeekRepository.findById(request.getWeekId().longValue())
+        ActiveWeek week = activeWeekRepository.findById(request.getWeekId())
                 .orElseThrow(() -> new ResourceNotFoundException("ActiveWeek", "id", request.getWeekId()));
 
         if (!week.isActive()) {
