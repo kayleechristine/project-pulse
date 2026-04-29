@@ -19,8 +19,8 @@ public class PeerEvaluationService {
 
     @Transactional
     public PeerEvaluation submit(Integer evaluatorId, PeerEvaluationRequest request) {
-        // TODO: validate evaluatee is a teammate (needs TeamMemberRepository — Leiton)
-        // TODO: validate weekId is the previous active week (needs ActiveWeekRepository — Leiton)
+        // TODO: validate evaluatee is a teammate (needs TeamMemberRepository)
+        // TODO: validate weekId is the previous active week (needs ActiveWeekRepository)
 
         PeerEvaluation eval = evalRepository
                 .findByEvaluatorIdAndEvaluateeIdAndWeekId(
