@@ -24,6 +24,10 @@ public class InvitationService {
     }
 
     public InvitationToken generateToken(String email, UserRole role) {
+        return generateToken(email, role, null);
+    }
+
+    public InvitationToken generateToken(String email, UserRole role, Long sectionId) {
         if (role == UserRole.ADMIN) {
             throw new ValidationException("Cannot send invitations for the ADMIN role");
         }
@@ -36,6 +40,7 @@ public class InvitationService {
         token.setToken(UUID.randomUUID().toString());
         token.setEmail(email);
         token.setRole(role);
+        token.setSectionId(sectionId);
         token.setCreatedAt(Instant.now());
         token.setExpiresAt(Instant.now().plus(TOKEN_TTL));
         token.setUsed(false);

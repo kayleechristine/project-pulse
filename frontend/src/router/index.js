@@ -22,8 +22,15 @@ import RubricFormView from '../views/admin/RubricFormView.vue'
 import ActiveWeeksView from '../views/admin/ActiveWeeksView.vue'
 import InviteStudentView from '../views/admin/InviteStudentView.vue'
 import StudentsView from '../views/admin/StudentsView.vue'
+import StudentDetailView from '../views/admin/StudentDetailView.vue'
+import InviteInstructorView from '../views/admin/InviteInstructorView.vue'
+import InstructorsView from '../views/admin/InstructorsView.vue'
+import InstructorDetailView from '../views/admin/InstructorDetailView.vue'
 import TeamStudentsView from '../views/admin/TeamStudentsView.vue'
 import TeamWarReportView from '../views/instructor/TeamWarReportView.vue'
+import SectionReportView from '../views/instructor/SectionReportView.vue'
+import StudentPeerReportView from '../views/instructor/StudentPeerReportView.vue'
+import StudentWarReportView from '../views/instructor/StudentWarReportView.vue'
 
 const PlaceholderView = {
   template: `
@@ -79,7 +86,14 @@ const routes = [
 
       { path: 'students', component: StudentsView },
       { path: 'students/invite', component: InviteStudentView },
-      { path: 'reports', component: TeamWarReportView }
+      { path: 'students/:id', component: StudentDetailView },
+      { path: 'instructors', component: InstructorsView },
+      { path: 'instructors/invite', component: InviteInstructorView },
+      { path: 'instructors/:id', component: InstructorDetailView },
+      { path: 'reports', component: TeamWarReportView },
+      { path: 'reports/section-peer-eval', component: SectionReportView },
+      { path: 'reports/student-peer-eval', component: StudentPeerReportView },
+      { path: 'reports/student-war', component: StudentWarReportView }
     ]
   }
 ]

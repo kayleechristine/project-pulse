@@ -14,6 +14,8 @@ public class InviteRequest {
     @NotNull(message = "Role is required")
     private UserRole role;
 
+    private Long sectionId;
+
     public String getEmail() {
         return email;
     }
@@ -28,5 +30,13 @@ public class InviteRequest {
 
     public void setRole(UserRole role) {
         this.role = role;
+    }
+
+    public Long getSectionId() {
+        return sectionId;
+    }
+
+    public void setSectionId(Long sectionId) {
+        this.sectionId = sectionId;
     }
 }

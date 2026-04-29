@@ -1,6 +1,7 @@
 package edu.tcu.projectpulse.team;
 
 import edu.tcu.projectpulse.exception.ResourceNotFoundException;
+import edu.tcu.projectpulse.instructor.InstructorAssignmentService;
 import edu.tcu.projectpulse.shared.Result;
 import edu.tcu.projectpulse.shared.StatusCode;
 import edu.tcu.projectpulse.user.User;
@@ -26,13 +27,16 @@ public class TeamController {
     private final TeamRepository teamRepository;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final InstructorAssignmentService instructorAssignmentService;
 
     public TeamController(TeamRepository teamRepository,
                           UserService userService,
-                          UserRepository userRepository) {
+                          UserRepository userRepository,
+                          InstructorAssignmentService instructorAssignmentService) {
         this.teamRepository = teamRepository;
         this.userService = userService;
         this.userRepository = userRepository;
+        this.instructorAssignmentService = instructorAssignmentService;
     }
 
     @GetMapping("/my-team")
@@ -133,6 +137,18 @@ public class TeamController {
         return teamRepository.save(team);
     }
 
+    @PostMapping("/{teamId}/instructors")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Team assignInstructorsToTeam(@PathVariable Long teamId, @RequestBody InstructorAssignmentRequest request) {
+        return instructorAssignmentService.assign(teamId, request.instructorIds());
+    }
+
+    @DeleteMapping("/{teamId}/instructors/{instructorId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public Team removeInstructorFromTeam(@PathVariable Long teamId, @PathVariable Integer instructorId) {
+        return instructorAssignmentService.remove(teamId, instructorId);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTeam(@PathVariable Long id) {
@@ -154,6 +170,8 @@ public class TeamController {
     }
 
     public record StudentAssignmentRequest(Set<Integer> studentIds) {}
+
+    public record InstructorAssignmentRequest(Set<Integer> instructorIds) {}
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

@@ -30,6 +30,8 @@ public class InvitationToken {
     @Column(nullable = false)
     private UserRole role;
 
+    private Long sectionId;
+
     @Column(nullable = false)
     private Instant expiresAt;
 
@@ -65,6 +67,14 @@ public class InvitationToken {
 
     public void setRole(UserRole role) {
         this.role = role;
+    }
+
+    public Long getSectionId() {
+        return sectionId;
+    }
+
+    public void setSectionId(Long sectionId) {
+        this.sectionId = sectionId;
     }
 
     public Instant getExpiresAt() {

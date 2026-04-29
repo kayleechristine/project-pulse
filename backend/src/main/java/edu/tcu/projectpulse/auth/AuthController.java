@@ -2,6 +2,7 @@ package edu.tcu.projectpulse.auth;
 
 import edu.tcu.projectpulse.auth.dto.LoginRequest;
 import edu.tcu.projectpulse.shared.Result;
+import edu.tcu.projectpulse.user.dto.RegisterRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,5 +22,10 @@ public class AuthController {
     @PostMapping("/login")
     public Result login(@RequestBody @Valid LoginRequest request) {
         return authService.login(request);
+    }
+
+    @PostMapping("/register")
+    public Result register(@RequestBody @Valid RegisterRequest request) {
+        return authService.register(request);
     }
 }
