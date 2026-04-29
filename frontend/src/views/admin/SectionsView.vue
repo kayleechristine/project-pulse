@@ -63,7 +63,7 @@
             <td>{{ section.name }}</td>
             <td>{{ section.startDate }} - {{ section.endDate }}</td>
             <td>{{ section.teamCount ?? section.teams?.length ?? 0 }}</td>
-            <td>{{ getRubricName(section.rubricId) }}</td>
+            <td>{{ getRubricName(section.rubricId ?? section.rubric?.id) }}</td>
             <td>
               <v-btn size="small" variant="text" :to="`/sections/${section.id}`">View</v-btn>
               <v-btn size="small" variant="outlined" class="mx-2" :to="`/sections/${section.id}/edit`">Edit</v-btn>
@@ -95,6 +95,14 @@ const academicYear = ref('All')
 const appliedAcademicYear = ref('All')
 const error = ref('')
 
+function unwrapResponse(response) {
+  if (Array.isArray(response)) return response
+  if (Array.isArray(response?.data)) return response.data
+  if (Array.isArray(response?.content)) return response.content
+  if (Array.isArray(response?.result)) return response.result
+  return []
+}
+
 const academicYearOptions = computed(() => {
   const years = sections.value.map(section => section.name).filter(Boolean)
   return ['All', ...new Set(years)]
@@ -102,8 +110,14 @@ const academicYearOptions = computed(() => {
 
 const filteredSections = computed(() => {
   return sections.value.filter(section => {
-    const matchesSearch = section.name?.toLowerCase().includes(appliedSearch.value.toLowerCase())
-    const matchesYear = appliedAcademicYear.value === 'All' || section.name === appliedAcademicYear.value
+    const matchesSearch =
+      !appliedSearch.value ||
+      section.name?.toLowerCase().includes(appliedSearch.value.toLowerCase())
+
+    const matchesYear =
+      appliedAcademicYear.value === 'All' ||
+      section.name === appliedAcademicYear.value
+
     return matchesSearch && matchesYear
   })
 })
@@ -127,10 +141,19 @@ function resetFilters() {
 
 async function loadData() {
   try {
-    sections.value = await getSections()
-    rubrics.value = await getRubrics()
+    error.value = ''
+
+    const sectionsResponse = await getSections()
+    const rubricsResponse = await getRubrics()
+
+    sections.value = unwrapResponse(sectionsResponse)
+    rubrics.value = unwrapResponse(rubricsResponse)
+
+    console.log('Loaded sections:', sections.value)
+    console.log('Loaded rubrics:', rubrics.value)
   } catch (err) {
     error.value = err.message
+    console.error(err)
   }
 }
 

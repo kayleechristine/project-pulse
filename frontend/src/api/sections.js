@@ -1,21 +1,58 @@
-import api from '../plugins/axios'
+const API_BASE_URL = 'http://localhost:8080/api/sections'
 
-export function getSections() {
-  return api.get('/api/sections')
+async function handleResponse(response, errorMessage) {
+  if (!response.ok) {
+    throw new Error(errorMessage)
+  }
+
+  if (response.status === 204) {
+    return null
+  }
+
+  const data = await response.json()
+
+  // Supports either plain arrays/objects OR backend wrappers like { data: ... }
+  return data.data ?? data
 }
 
-export function getSection(id) {
-  return api.get(`/api/sections/${id}`)
+export async function getSections() {
+  const response = await fetch(API_BASE_URL)
+  return handleResponse(response, 'Failed to fetch sections')
 }
 
-export function createSection(payload) {
-  return api.post('/api/sections', payload)
+export async function getSection(id) {
+  const response = await fetch(`${API_BASE_URL}/${id}`)
+  return handleResponse(response, 'Failed to fetch section')
 }
 
-export function updateSection(id, payload) {
-  return api.put(`/api/sections/${id}`, payload)
+export async function createSection(section) {
+  const response = await fetch(API_BASE_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(section),
+  })
+
+  return handleResponse(response, 'Failed to create section')
 }
 
-export function deleteSection(id) {
-  return api.delete(`/api/sections/${id}`)
+export async function updateSection(id, section) {
+  const response = await fetch(`${API_BASE_URL}/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(section),
+  })
+
+  return handleResponse(response, 'Failed to update section')
+}
+
+export async function deleteSection(id) {
+  const response = await fetch(`${API_BASE_URL}/${id}`, {
+    method: 'DELETE',
+  })
+
+  return handleResponse(response, 'Failed to delete section')
 }

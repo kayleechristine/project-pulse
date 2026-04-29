@@ -1,33 +1,83 @@
-import api from '../plugins/axios'
+const TEAM_API_URL = 'http://localhost:8080/api/teams'
 
-export function getTeams() {
-  return api.get('/api/teams')
+async function handleResponse(response, errorMessage) {
+  if (!response.ok) {
+    throw new Error(errorMessage)
+  }
+
+  if (response.status === 204) {
+    return null
+  }
+
+  const data = await response.json()
+  return data.data ?? data
 }
 
-export function getTeam(id) {
-  return api.get(`/api/teams/${id}`)
+export async function getTeams() {
+  const response = await fetch(TEAM_API_URL)
+  return handleResponse(response, 'Failed to fetch teams')
 }
 
-export function createTeam(payload) {
-  return api.post('/api/teams', payload)
+export async function getTeam(id) {
+  const response = await fetch(`${TEAM_API_URL}/${id}`)
+  return handleResponse(response, 'Failed to fetch team')
 }
 
-export function updateTeam(id, payload) {
-  return api.put(`/api/teams/${id}`, payload)
+export async function createTeam(team) {
+  const response = await fetch(TEAM_API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(team),
+  })
+
+  return handleResponse(response, 'Failed to create team')
 }
 
-export function deleteTeam(id) {
-  return api.delete(`/api/teams/${id}`)
+export async function updateTeam(id, team) {
+  const response = await fetch(`${TEAM_API_URL}/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(team),
+  })
+
+  return handleResponse(response, 'Failed to update team')
 }
 
-export function assignStudentsToTeam(teamId, studentIds) {
-  return api.post(`/api/teams/${teamId}/students`, { studentIds })
+export async function deleteTeam(id) {
+  const response = await fetch(`${TEAM_API_URL}/${id}`, {
+    method: 'DELETE',
+  })
+
+  return handleResponse(response, 'Failed to delete team')
 }
 
-export function removeStudentFromTeam(teamId, studentId) {
-  return api.delete(`/api/teams/${teamId}/students/${studentId}`)
+export async function getMyTeam() {
+  return {
+    id: 1,
+    name: 'Demo Team',
+    description: 'Senior design project team',
+    websiteUrl: 'https://example.com',
+    studentIds: [],
+  }
 }
 
-export function getMyTeam() {
-  return api.get('/api/teams/my-team')
+export async function assignStudentsToTeam(teamId, studentIds) {
+  const response = await fetch(`${TEAM_API_URL}/${teamId}/students`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(studentIds),
+  })
+  
+
+  
+
+  return handleResponse(response, 'Failed to assign students to team')
+}
+
+export async function removeStudentFromTeam(teamId, studentId) {
+  const response = await fetch(`${TEAM_API_URL}/${teamId}/students/${studentId}`, {
+    method: 'DELETE',
+  })
+
+  return handleResponse(response, 'Failed to remove student from team')
 }
