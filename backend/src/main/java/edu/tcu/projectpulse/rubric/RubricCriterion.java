@@ -9,7 +9,7 @@ public class RubricCriterion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     private String name;
     private String description;
@@ -20,7 +20,7 @@ public class RubricCriterion {
     @JsonIgnore
     private Rubric rubric;
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
