@@ -23,6 +23,7 @@ import ActiveWeeksView from '../views/admin/ActiveWeeksView.vue'
 import InviteStudentView from '../views/admin/InviteStudentView.vue'
 import StudentsView from '../views/admin/StudentsView.vue'
 import TeamStudentsView from '../views/admin/TeamStudentsView.vue'
+import TeamWarReportView from '../views/instructor/TeamWarReportView.vue'
 
 const PlaceholderView = {
   template: `
@@ -78,7 +79,7 @@ const routes = [
 
       { path: 'students', component: StudentsView },
       { path: 'students/invite', component: InviteStudentView },
-      { path: 'reports', component: PlaceholderView }
+      { path: 'reports', component: TeamWarReportView }
     ]
   }
 ]

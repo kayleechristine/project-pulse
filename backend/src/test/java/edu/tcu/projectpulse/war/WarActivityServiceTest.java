@@ -1,6 +1,9 @@
 package edu.tcu.projectpulse.war;
 
+import edu.tcu.projectpulse.activeweek.ActiveWeek;
+import edu.tcu.projectpulse.activeweek.ActiveWeekRepository;
 import edu.tcu.projectpulse.exception.ResourceNotFoundException;
+import edu.tcu.projectpulse.exception.ValidationException;
 import edu.tcu.projectpulse.war.dto.WarActivityRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,6 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +28,9 @@ class WarActivityServiceTest {
 
     @Mock
     private WarActivityRepository warActivityRepository;
+
+    @Mock
+    private ActiveWeekRepository activeWeekRepository;
 
     @InjectMocks
     private WarActivityService warActivityService;
@@ -41,8 +48,17 @@ class WarActivityServiceTest {
         request.setStatus(ActivityStatus.DONE);
     }
 
+    private ActiveWeek activeWeek(boolean active, LocalDate startDate) {
+        ActiveWeek week = new ActiveWeek();
+        week.setActive(active);
+        week.setStartDate(startDate);
+        return week;
+    }
+
     @Test
-    void should_AddActivity_When_RequestIsValid() {
+    void should_AddActivity_When_WeekIsActiveAndNotFuture() {
+        given(activeWeekRepository.findById(1L))
+                .willReturn(Optional.of(activeWeek(true, LocalDate.now().minusDays(1))));
         given(warActivityRepository.save(any(WarActivity.class))).willAnswer(inv -> inv.getArgument(0));
 
         warActivityService.add(1, request);
@@ -124,5 +140,33 @@ class WarActivityServiceTest {
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getStudentId()).isEqualTo(1);
+    }
+
+    @Test
+    void should_ThrowException_When_WeekIdNotFound() {
+        given(activeWeekRepository.findById(1L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> warActivityService.add(1, request))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void should_ThrowException_When_WeekIsNotActive() {
+        given(activeWeekRepository.findById(1L))
+                .willReturn(Optional.of(activeWeek(false, LocalDate.now().minusDays(1))));
+
+        assertThatThrownBy(() -> warActivityService.add(1, request))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("not an active week");
+    }
+
+    @Test
+    void should_ThrowException_When_WeekIsInFuture() {
+        given(activeWeekRepository.findById(1L))
+                .willReturn(Optional.of(activeWeek(true, LocalDate.now().plusDays(7))));
+
+        assertThatThrownBy(() -> warActivityService.add(1, request))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("future week");
     }
 }
