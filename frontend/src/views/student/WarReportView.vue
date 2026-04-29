@@ -5,13 +5,15 @@
 
     <v-select
       v-model="selectedWeekId"
-      :items="MOCK_WEEKS"
+      :items="weeks"
       item-title="label"
       item-value="id"
       label="Select Week"
       variant="outlined"
       style="max-width: 320px"
       class="mb-6"
+      :loading="loadingWeeks"
+      :disabled="loadingWeeks"
       @update:model-value="loadReport"
     />
 
@@ -59,15 +61,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getTeamWarReport } from '../../api/war'
-
-const MOCK_WEEKS = [
-  { id: 1, label: 'Week 1 (Jan 13 – Jan 19)' },
-  { id: 2, label: 'Week 2 (Jan 20 – Jan 26)' },
-  { id: 3, label: 'Week 3 (Jan 27 – Feb 2)' },
-]
-
-const MOCK_TEAM_ID = 1
+import { getMyTeam, getTeamWarReport } from '../../api/war'
+import { getActiveWeeksForSection } from '../../api/activeWeeks'
 
 const CATEGORY_LABELS = {
   DEVELOPMENT: 'Development', TESTING: 'Testing', BUGFIX: 'Bug Fix',
@@ -85,18 +80,50 @@ const STATUS_LABELS = {
 function categoryLabel(val) { return CATEGORY_LABELS[val] ?? val }
 function statusLabel(val) { return STATUS_LABELS[val] ?? val }
 
-const selectedWeekId = ref(MOCK_WEEKS[0].id)
+function formatWeekLabel(weekStart) {
+  const start = new Date(weekStart + 'T00:00:00')
+  const end = new Date(start)
+  end.setDate(end.getDate() + 6)
+  const fmt = { month: 'short', day: 'numeric' }
+  return `${start.toLocaleDateString('en-US', fmt)} – ${end.toLocaleDateString('en-US', fmt)}`
+}
+
+const selectedWeekId = ref(null)
+const weeks = ref([])
+const loadingWeeks = ref(false)
+const teamId = ref(null)
 const report = ref(null)
-const loading = ref(true)
+const loading = ref(false)
 const error = ref('')
 
-onMounted(loadReport)
+onMounted(async () => {
+  loadingWeeks.value = true
+  error.value = ''
+  try {
+    const teamRes = await getMyTeam()
+    teamId.value = teamRes.data.data.teamId
+    const sectionId = teamRes.data.data.sectionId
+    const weeksRes = await getActiveWeeksForSection(sectionId)
+    weeks.value = weeksRes.data.data.map(w => ({
+      id: w.id,
+      label: formatWeekLabel(w.weekStart),
+    }))
+    if (weeks.value.length > 0) {
+      selectedWeekId.value = weeks.value[0].id
+      await loadReport()
+    }
+  } catch {
+    error.value = 'Failed to load weeks.'
+  } finally {
+    loadingWeeks.value = false
+  }
+})
 
 async function loadReport() {
   loading.value = true
   error.value = ''
   try {
-    const response = await getTeamWarReport(MOCK_TEAM_ID, selectedWeekId.value)
+    const response = await getTeamWarReport(teamId.value, selectedWeekId.value)
     report.value = response.data.data
   } catch (err) {
     error.value = err.response?.data?.message ?? 'Failed to load report.'
