@@ -67,6 +67,18 @@ class InvitationServiceTest {
     }
 
     @Test
+    void should_SaveSectionId_When_StudentInvitationTargetsASection() {
+        given(userService.findByEmail("newuser@test.com")).willReturn(Optional.empty());
+        given(tokenRepository.save(any(InvitationToken.class))).willReturn(validToken);
+
+        invitationService.generateToken("newuser@test.com", UserRole.STUDENT, 42L);
+
+        ArgumentCaptor<InvitationToken> captor = ArgumentCaptor.forClass(InvitationToken.class);
+        verify(tokenRepository).save(captor.capture());
+        assertThat(captor.getValue().getSectionId()).isEqualTo(42L);
+    }
+
+    @Test
     void should_ThrowValidationException_When_RoleIsAdmin() {
         assertThatThrownBy(() -> invitationService.generateToken("admin@test.com", UserRole.ADMIN))
                 .isInstanceOf(ValidationException.class)

@@ -104,6 +104,7 @@ const navItems = computed(() => {
     { title: 'Teams', to: '/teams', icon: 'mdi-account-group-outline' },
     { title: 'Rubrics', to: '/rubrics', icon: 'mdi-clipboard-text-outline' },
     { title: 'Students', to: '/students', icon: 'mdi-school-outline' },
+    { title: 'Instructors', to: '/instructors', icon: 'mdi-account-tie-outline' },
     { title: 'Reports', to: '/reports', icon: 'mdi-file-chart-outline' },
   ]
 })

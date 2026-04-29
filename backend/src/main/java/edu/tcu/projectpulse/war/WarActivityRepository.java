@@ -11,4 +11,10 @@ public interface WarActivityRepository extends JpaRepository<WarActivity, Intege
     List<WarActivity> findByWeekId(Integer weekId);
 
     boolean existsByStudentIdAndWeekId(Integer studentId, Integer weekId);
+
+    List<WarActivity> findByStudentId(Integer studentId);
+
+    List<WarActivity> findByStudentIdAndWeekIdIn(Integer studentId, List<Integer> weekIds);
+
+    void deleteByStudentId(Integer studentId);
 }
