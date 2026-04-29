@@ -1,7 +1,7 @@
 package edu.tcu.projectpulse.report;
 
-import edu.tcu.projectpulse.team.TeamMember;
-import edu.tcu.projectpulse.team.TeamMemberRepository;
+import edu.tcu.projectpulse.team.Team;
+import edu.tcu.projectpulse.team.TeamRepository;
 import edu.tcu.projectpulse.war.WarActivity;
 import edu.tcu.projectpulse.war.WarActivityRepository;
 import org.junit.jupiter.api.Test;
@@ -12,6 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -23,16 +25,15 @@ class WarReportServiceTest {
     private WarActivityRepository warActivityRepository;
 
     @Mock
-    private TeamMemberRepository teamMemberRepository;
+    private TeamRepository teamRepository;
 
     @InjectMocks
     private WarReportService warReportService;
 
-    private TeamMember member(Integer teamId, Integer studentId) {
-        TeamMember m = new TeamMember();
-        m.setTeamId(teamId);
-        m.setStudentId(studentId);
-        return m;
+    private Team team(Integer id, Set<Integer> studentIds) {
+        Team t = new Team();
+        t.setStudentIds(studentIds);
+        return t;
     }
 
     private WarActivity activity(Integer studentId, Integer weekId) {
@@ -45,10 +46,7 @@ class WarReportServiceTest {
     @Test
     @SuppressWarnings("unchecked")
     void should_FlagNonSubmitter_When_StudentHasNoActivities() {
-        given(teamMemberRepository.findByTeamId(1)).willReturn(List.of(
-                member(1, 10),
-                member(1, 11)
-        ));
+        given(teamRepository.findById(1L)).willReturn(Optional.of(team(1, Set.of(10, 11))));
         given(warActivityRepository.findByStudentIdAndWeekId(10, 5)).willReturn(List.of(activity(10, 5)));
         given(warActivityRepository.findByStudentIdAndWeekId(11, 5)).willReturn(List.of());
 
@@ -68,7 +66,7 @@ class WarReportServiceTest {
 
     @Test
     void should_ReturnEmptyEntries_When_TeamHasNoMembers() {
-        given(teamMemberRepository.findByTeamId(99)).willReturn(List.of());
+        given(teamRepository.findById(99L)).willReturn(Optional.of(team(99, Set.of())));
 
         Map<String, Object> report = warReportService.buildTeamWarReport(99, 1);
 
@@ -80,10 +78,7 @@ class WarReportServiceTest {
     @Test
     @SuppressWarnings("unchecked")
     void should_MarkAllSubmitted_When_AllMembersHaveActivities() {
-        given(teamMemberRepository.findByTeamId(2)).willReturn(List.of(
-                member(2, 20),
-                member(2, 21)
-        ));
+        given(teamRepository.findById(2L)).willReturn(Optional.of(team(2, Set.of(20, 21))));
         given(warActivityRepository.findByStudentIdAndWeekId(20, 3)).willReturn(List.of(activity(20, 3)));
         given(warActivityRepository.findByStudentIdAndWeekId(21, 3)).willReturn(List.of(activity(21, 3)));
 

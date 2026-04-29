@@ -48,16 +48,16 @@ class WarActivityServiceTest {
         request.setStatus(ActivityStatus.DONE);
     }
 
-    private ActiveWeek activeWeek(boolean active, LocalDate weekStart) {
+    private ActiveWeek activeWeek(boolean active, LocalDate startDate) {
         ActiveWeek week = new ActiveWeek();
         week.setActive(active);
-        week.setWeekStart(weekStart);
+        week.setStartDate(startDate);
         return week;
     }
 
     @Test
     void should_AddActivity_When_WeekIsActiveAndNotFuture() {
-        given(activeWeekRepository.findById(1))
+        given(activeWeekRepository.findById(1L))
                 .willReturn(Optional.of(activeWeek(true, LocalDate.now().minusDays(1))));
         given(warActivityRepository.save(any(WarActivity.class))).willAnswer(inv -> inv.getArgument(0));
 
@@ -144,7 +144,7 @@ class WarActivityServiceTest {
 
     @Test
     void should_ThrowException_When_WeekIdNotFound() {
-        given(activeWeekRepository.findById(1)).willReturn(Optional.empty());
+        given(activeWeekRepository.findById(1L)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> warActivityService.add(1, request))
                 .isInstanceOf(ResourceNotFoundException.class);
@@ -152,7 +152,7 @@ class WarActivityServiceTest {
 
     @Test
     void should_ThrowException_When_WeekIsNotActive() {
-        given(activeWeekRepository.findById(1))
+        given(activeWeekRepository.findById(1L))
                 .willReturn(Optional.of(activeWeek(false, LocalDate.now().minusDays(1))));
 
         assertThatThrownBy(() -> warActivityService.add(1, request))
@@ -162,7 +162,7 @@ class WarActivityServiceTest {
 
     @Test
     void should_ThrowException_When_WeekIsInFuture() {
-        given(activeWeekRepository.findById(1))
+        given(activeWeekRepository.findById(1L))
                 .willReturn(Optional.of(activeWeek(true, LocalDate.now().plusDays(7))));
 
         assertThatThrownBy(() -> warActivityService.add(1, request))

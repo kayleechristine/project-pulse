@@ -29,13 +29,13 @@ public class WarActivityService {
 
     @Transactional
     public WarActivity add(Integer studentId, WarActivityRequest request) {
-        ActiveWeek week = activeWeekRepository.findById(request.getWeekId())
+        ActiveWeek week = activeWeekRepository.findById(request.getWeekId().longValue())
                 .orElseThrow(() -> new ResourceNotFoundException("ActiveWeek", "id", request.getWeekId()));
 
         if (!week.isActive()) {
             throw new ValidationException("Week " + request.getWeekId() + " is not an active week");
         }
-        if (week.getWeekStart().isAfter(LocalDate.now())) {
+        if (week.getStartDate().isAfter(LocalDate.now())) {
             throw new ValidationException("Cannot submit activities for a future week");
         }
 

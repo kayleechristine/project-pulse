@@ -144,7 +144,7 @@ async function loadWeeksForTeam(team) {
     const res = await getActiveWeeksForSection(team.sectionId)
     weeks.value = res.data.data.map(w => ({
       id: w.id,
-      label: formatWeekLabel(w.weekStart),
+      label: formatWeekLabel(w.startDate),
     }))
     if (weeks.value.length > 0) {
       selectedWeekId.value = weeks.value[0].id
