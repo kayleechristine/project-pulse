@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/teams")
@@ -62,6 +63,28 @@ public class TeamController {
         return teamRepository.save(team);
     }
 
+    @PostMapping("/{teamId}/students")
+    public Team assignStudentsToTeam(@PathVariable Long teamId, @RequestBody StudentAssignmentRequest request) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
+
+        if (request.studentIds() == null || request.studentIds().isEmpty()) {
+            throw new IllegalArgumentException("At least one student is required");
+        }
+
+        team.getStudentIds().addAll(request.studentIds());
+        return teamRepository.save(team);
+    }
+
+    @DeleteMapping("/{teamId}/students/{studentId}")
+    public Team removeStudentFromTeam(@PathVariable Long teamId, @PathVariable Integer studentId) {
+        Team team = teamRepository.findById(teamId)
+                .orElseThrow(() -> new IllegalArgumentException("Team not found"));
+
+        team.getStudentIds().remove(studentId);
+        return teamRepository.save(team);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTeam(@PathVariable Long id) {
@@ -81,6 +104,8 @@ public class TeamController {
             throw new IllegalArgumentException("Team name is required");
         }
     }
+
+    public record StudentAssignmentRequest(Set<Integer> studentIds) {}
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

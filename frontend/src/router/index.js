@@ -22,6 +22,7 @@ import RubricFormView from '../views/admin/RubricFormView.vue'
 import ActiveWeeksView from '../views/admin/ActiveWeeksView.vue'
 import InviteStudentView from '../views/admin/InviteStudentView.vue'
 import StudentsView from '../views/admin/StudentsView.vue'
+import TeamStudentsView from '../views/admin/TeamStudentsView.vue'
 
 const PlaceholderView = {
   template: `
@@ -70,6 +71,7 @@ const routes = [
       { path: 'teams/new', component: TeamFormView },
       { path: 'teams/:id', component: TeamDetailView },
       { path: 'teams/:id/edit', component: TeamFormView },
+      { path: 'teams/:id/students', component: TeamStudentsView },
 
       { path: 'rubrics', component: RubricsView },
       { path: 'rubrics/new', component: RubricFormView },

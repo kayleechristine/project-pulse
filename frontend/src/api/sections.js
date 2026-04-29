@@ -1,29 +1,21 @@
-const API_URL = 'http://localhost:8080/api/sections'
+import api from '../plugins/axios'
 
-export async function getSections() {
-  const response = await fetch(API_URL)
-  return response.json()
+export function getSections() {
+  return api.get('/api/sections')
 }
 
-export async function getSection(id) {
-  const response = await fetch(`${API_URL}/${id}`)
-  return response.json()
+export function getSection(id) {
+  return api.get(`/api/sections/${id}`)
 }
 
-export async function createSection(section) {
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(section)
-  })
-  return response.json()
+export function createSection(payload) {
+  return api.post('/api/sections', payload)
 }
 
-export async function updateSection(id, section) {
-  const response = await fetch(`${API_URL}/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(section)
-  })
-  return response.json()
+export function updateSection(id, payload) {
+  return api.put(`/api/sections/${id}`, payload)
+}
+
+export function deleteSection(id) {
+  return api.delete(`/api/sections/${id}`)
 }

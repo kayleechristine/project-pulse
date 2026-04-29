@@ -1,50 +1,35 @@
 package edu.tcu.projectpulse.activeweek;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-
+import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
+@Table(name = "active_weeks")
 public class ActiveWeek {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    private Integer sectionId;
+    private Long sectionId;
 
-    private LocalDate weekStart;
+    private LocalDate startDate;
 
-    private boolean active = true;
+    private LocalDate endDate;
 
-    public Integer getId() {
-        return id;
-    }
+    private boolean active;
 
-    public Integer getSectionId() {
-        return sectionId;
-    }
+    public Long getId() { return id; }
 
-    public void setSectionId(Integer sectionId) {
-        this.sectionId = sectionId;
-    }
+    public Long getSectionId() { return sectionId; }
+    public void setSectionId(Long sectionId) { this.sectionId = sectionId; }
 
-    public LocalDate getWeekStart() {
-        return weekStart;
-    }
+    public LocalDate getStartDate() { return startDate; }
+    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
 
-    public void setWeekStart(LocalDate weekStart) {
-        this.weekStart = weekStart;
-    }
+    public LocalDate getEndDate() { return endDate; }
+    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
 
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
 }

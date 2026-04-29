@@ -1,35 +1,29 @@
-const API_URL = 'http://localhost:8080/api/teams'
+import api from '../plugins/axios'
 
-export async function getTeams() {
-  const response = await fetch(API_URL)
-  return response.json()
+export function getTeams() {
+  return api.get('/api/teams')
 }
 
-export async function getTeam(id) {
-  const response = await fetch(`${API_URL}/${id}`)
-  return response.json()
+export function getTeam(id) {
+  return api.get(`/api/teams/${id}`)
 }
 
-export async function createTeam(team) {
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(team)
-  })
-  return response.json()
+export function createTeam(payload) {
+  return api.post('/api/teams', payload)
 }
 
-export async function updateTeam(id, team) {
-  const response = await fetch(`${API_URL}/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(team)
-  })
-  return response.json()
+export function updateTeam(id, payload) {
+  return api.put(`/api/teams/${id}`, payload)
 }
 
-export async function deleteTeam(id) {
-  return fetch(`${API_URL}/${id}`, {
-    method: 'DELETE'
-  })
+export function deleteTeam(id) {
+  return api.delete(`/api/teams/${id}`)
+}
+
+export function assignStudentsToTeam(teamId, studentIds) {
+  return api.post(`/api/teams/${teamId}/students`, { studentIds })
+}
+
+export function removeStudentFromTeam(teamId, studentId) {
+  return api.delete(`/api/teams/${teamId}/students/${studentId}`)
 }

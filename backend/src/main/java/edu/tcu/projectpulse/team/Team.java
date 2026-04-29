@@ -19,6 +19,19 @@ public class Team {
 
     private String websiteUrl;
 
+    @ElementCollection
+    @CollectionTable(name = "team_students", joinColumns = @JoinColumn(name = "team_id"))
+    @Column(name = "student_id")
+    private java.util.Set<Integer> studentIds = new java.util.HashSet<>();
+
+    public java.util.Set<Integer> getStudentIds() {
+        return studentIds;
+    }
+    
+    public void setStudentIds(java.util.Set<Integer> studentIds) {
+        this.studentIds = studentIds;
+    }
+    
     public Long getId() {
         return id;
     }
