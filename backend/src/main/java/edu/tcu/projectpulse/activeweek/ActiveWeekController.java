@@ -2,7 +2,10 @@ package edu.tcu.projectpulse.activeweek;
 
 import edu.tcu.projectpulse.section.Section;
 import edu.tcu.projectpulse.section.SectionRepository;
+import edu.tcu.projectpulse.shared.Result;
+import edu.tcu.projectpulse.shared.StatusCode;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,11 +21,14 @@ public class ActiveWeekController {
 
     private final ActiveWeekRepository activeWeekRepository;
     private final SectionRepository sectionRepository;
+    private final ActiveWeekService activeWeekService;
 
     public ActiveWeekController(ActiveWeekRepository activeWeekRepository,
-                                SectionRepository sectionRepository) {
+                                SectionRepository sectionRepository,
+                                ActiveWeekService activeWeekService) {
         this.activeWeekRepository = activeWeekRepository;
         this.sectionRepository = sectionRepository;
+        this.activeWeekService = activeWeekService;
     }
 
     @GetMapping("/section/{sectionId}")
@@ -37,6 +43,13 @@ public class ActiveWeekController {
                 .orElseThrow(() -> new IllegalArgumentException("Section not found"));
 
         return generateWeeks(section);
+    }
+
+    @GetMapping("/section/{sectionId}/available")
+    @PreAuthorize("hasAnyRole('STUDENT', 'INSTRUCTOR')")
+    public Result getAvailableWeeksForSection(@PathVariable Long sectionId) {
+        List<ActiveWeek> weeks = activeWeekService.getWeeksForSection(sectionId);
+        return new Result(true, StatusCode.SUCCESS, "Active weeks retrieved.", weeks);
     }
 
     @PostMapping("/section/{sectionId}")

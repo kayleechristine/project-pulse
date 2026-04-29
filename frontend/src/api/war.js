@@ -1,5 +1,9 @@
 import api from '../plugins/axios'
 
+export function getMyTeam() {
+  return api.get('/api/teams/my-team')
+}
+
 export function getActivities(weekId) {
   return api.get('/api/war-activities', { params: { weekId } })
 }

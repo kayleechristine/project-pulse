@@ -7,13 +7,15 @@
 
     <v-select
       v-model="selectedWeekId"
-      :items="MOCK_WEEKS"
+      :items="weeks"
       item-title="label"
       item-value="id"
       label="Select Week"
       variant="outlined"
       style="max-width: 320px"
       class="mb-6"
+      :loading="loadingWeeks"
+      :disabled="loadingWeeks"
       @update:model-value="loadActivities"
     />
 
@@ -56,17 +58,14 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getActivities, deleteActivity } from '../../api/war'
+import { getMyTeam, getActivities, deleteActivity } from '../../api/war'
+import { getActiveWeeksForSection } from '../../api/activeWeeks'
 import WarActivityTable from '../../components/WarActivityTable.vue'
 import WarActivityForm from '../../components/WarActivityForm.vue'
 
-const MOCK_WEEKS = [
-  { id: 1, label: 'Week 1 (Jan 13 – Jan 19)' },
-  { id: 2, label: 'Week 2 (Jan 20 – Jan 26)' },
-  { id: 3, label: 'Week 3 (Jan 27 – Feb 2)' },
-]
-
-const selectedWeekId = ref(MOCK_WEEKS[0].id)
+const selectedWeekId = ref(null)
+const weeks = ref([])
+const loadingWeeks = ref(false)
 const activities = ref([])
 const error = ref('')
 
@@ -77,7 +76,39 @@ const deleteDialogOpen = ref(false)
 const deletingActivity = ref(null)
 const deleting = ref(false)
 
-onMounted(loadActivities)
+onMounted(async () => {
+  await loadWeeks()
+  if (selectedWeekId.value) loadActivities()
+})
+
+async function loadWeeks() {
+  loadingWeeks.value = true
+  error.value = ''
+  try {
+    const teamRes = await getMyTeam()
+    const sectionId = teamRes.data.data.sectionId
+    const weeksRes = await getActiveWeeksForSection(sectionId)
+    weeks.value = weeksRes.data.data.map(w => ({
+      id: w.id,
+      label: formatWeekLabel(w.startDate),
+    }))
+    if (weeks.value.length > 0) {
+      selectedWeekId.value = weeks.value[0].id
+    }
+  } catch {
+    error.value = 'Failed to load weeks.'
+  } finally {
+    loadingWeeks.value = false
+  }
+}
+
+function formatWeekLabel(weekStart) {
+  const start = new Date(weekStart + 'T00:00:00')
+  const end = new Date(start)
+  end.setDate(end.getDate() + 6)
+  const fmt = { month: 'short', day: 'numeric' }
+  return `${start.toLocaleDateString('en-US', fmt)} – ${end.toLocaleDateString('en-US', fmt)}`
+}
 
 async function loadActivities() {
   error.value = ''
