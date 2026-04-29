@@ -20,7 +20,7 @@
       <div class="text-h6 font-weight-medium mb-3">Scores by Criterion</div>
       <PeerEvalScoreTable
         :criterion-averages="report.criterionAverages"
-        :criteria="MOCK_CRITERIA"
+        :criteria="criteria"
         class="mb-6"
         style="max-width: 500px"
       />
@@ -49,27 +49,38 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { getMyTeam } from '../../api/teams'
+import { getActiveWeeksBySection } from '../../api/activeWeeks'
+import { getRubrics } from '../../api/rubric'
 import { getMyReport } from '../../api/peerEval'
 import PeerEvalScoreTable from '../../components/PeerEvalScoreTable.vue'
 
-const MOCK_CRITERIA = [
-  { id: 1, name: 'Contribution to Team Goals' },
-  { id: 2, name: 'Quality of Work' },
-  { id: 3, name: 'Communication' },
-  { id: 4, name: 'Reliability / Dependability' },
-  { id: 5, name: 'Collaboration / Teamwork' },
-  { id: 6, name: 'Initiative / Problem Solving' },
-]
-
-const weekId = 1
+const weekId = ref(null)
+const criteria = ref([])
 const report = ref(null)
 const loading = ref(true)
 const error = ref('')
 
 onMounted(async () => {
   try {
-    const response = await getMyReport(weekId)
-    report.value = response.data.data
+    const [teamRes, rubricRes] = await Promise.all([getMyTeam(), getRubrics()])
+
+    const teamData = teamRes.data.data
+    const rubrics = rubricRes.data
+
+    criteria.value = rubrics[0]?.criteria ?? []
+
+    const weeksRes = await getActiveWeeksBySection(teamData.sectionId)
+    const activeWeek = weeksRes.data.find(w => w.active)
+    if (!activeWeek) {
+      error.value = 'No active week found.'
+      return
+    }
+
+    weekId.value = activeWeek.id
+
+    const reportRes = await getMyReport(activeWeek.id)
+    report.value = reportRes.data.data
   } catch (err) {
     error.value = err.response?.data?.message ?? 'Failed to load report.'
   } finally {

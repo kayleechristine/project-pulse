@@ -37,7 +37,7 @@
 import { computed, ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getSection } from '../../api/sections'
-import { saveActiveWeeks } from '../../api/activeWeeks'
+import { saveActiveWeeksBySection as saveActiveWeeks } from '../../api/activeWeeks'
 
 const route = useRoute()
 

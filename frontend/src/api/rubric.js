@@ -1,15 +1,9 @@
-const API_URL = 'http://localhost:8080/api/rubrics'
+import api from '../plugins/axios'
 
-export async function getRubrics() {
-  const response = await fetch(API_URL)
-  return response.json()
+export function getRubrics() {
+  return api.get('/api/rubrics')
 }
 
-export async function createRubric(rubric) {
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(rubric)
-  })
-  return response.json()
+export function createRubric(rubric) {
+  return api.post('/api/rubrics', rubric)
 }

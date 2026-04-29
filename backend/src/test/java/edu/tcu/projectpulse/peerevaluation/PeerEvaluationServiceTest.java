@@ -1,7 +1,12 @@
 package edu.tcu.projectpulse.peerevaluation;
 
+import edu.tcu.projectpulse.activeweek.ActiveWeek;
+import edu.tcu.projectpulse.activeweek.ActiveWeekRepository;
+import edu.tcu.projectpulse.exception.ValidationException;
 import edu.tcu.projectpulse.peerevaluation.dto.PeerEvaluationRequest;
 import edu.tcu.projectpulse.peerevaluation.dto.ScoreEntry;
+import edu.tcu.projectpulse.team.Team;
+import edu.tcu.projectpulse.team.TeamRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,10 +17,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,10 +33,18 @@ class PeerEvaluationServiceTest {
     @Mock
     private PeerEvaluationRepository evalRepository;
 
+    @Mock
+    private TeamRepository teamRepository;
+
+    @Mock
+    private ActiveWeekRepository activeWeekRepository;
+
     @InjectMocks
     private PeerEvaluationService peerEvalService;
 
     private PeerEvaluationRequest request;
+    private Team team;
+    private ActiveWeek activeWeek;
 
     @BeforeEach
     void setUp() {
@@ -45,6 +62,15 @@ class PeerEvaluationServiceTest {
         request.setPublicComments("Great work.");
         request.setPrivateComments("Needs improvement in meetings.");
         request.setScores(List.of(score1, score2));
+
+        team = new Team();
+        team.setStudentIds(Set.of(1, 2));
+
+        activeWeek = new ActiveWeek();
+        activeWeek.setActive(true);
+
+        lenient().when(teamRepository.findByStudentId(1)).thenReturn(Optional.of(team));
+        lenient().when(activeWeekRepository.findById(1L)).thenReturn(Optional.of(activeWeek));
     }
 
     @Test
@@ -100,5 +126,60 @@ class PeerEvaluationServiceTest {
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getEvaluateeId()).isEqualTo(1);
+    }
+
+    @Test
+    void should_ThrowValidationException_When_EvaluatorAndEvaluateeAreSamePerson() {
+        request.setEvaluateeId(1);
+
+        assertThatThrownBy(() -> peerEvalService.submit(1, request))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("cannot evaluate yourself");
+
+        verify(evalRepository, never()).save(any());
+    }
+
+    @Test
+    void should_ThrowValidationException_When_EvaluatorHasNoTeam() {
+        given(teamRepository.findByStudentId(1)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> peerEvalService.submit(1, request))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("not assigned to a team");
+
+        verify(evalRepository, never()).save(any());
+    }
+
+    @Test
+    void should_ThrowValidationException_When_EvaluateeIsNotATeammate() {
+        team.setStudentIds(Set.of(1, 99));
+
+        assertThatThrownBy(() -> peerEvalService.submit(1, request))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("only evaluate members of your own team");
+
+        verify(evalRepository, never()).save(any());
+    }
+
+    @Test
+    void should_ThrowValidationException_When_WeekDoesNotExist() {
+        given(activeWeekRepository.findById(1L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> peerEvalService.submit(1, request))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("does not exist");
+
+        verify(evalRepository, never()).save(any());
+    }
+
+    @Test
+    void should_ThrowValidationException_When_WeekIsNotActive() {
+        activeWeek.setActive(false);
+
+        assertThatThrownBy(() -> peerEvalService.submit(1, request))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("active weeks");
+
+        verify(evalRepository, never()).save(any());
     }
 }

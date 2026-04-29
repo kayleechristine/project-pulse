@@ -27,3 +27,7 @@ export function assignStudentsToTeam(teamId, studentIds) {
 export function removeStudentFromTeam(teamId, studentId) {
   return api.delete(`/api/teams/${teamId}/students/${studentId}`)
 }
+
+export function getMyTeam() {
+  return api.get('/api/teams/my-team')
+}
