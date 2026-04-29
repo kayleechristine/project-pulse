@@ -5,8 +5,12 @@
       <v-alert v-if="error" type="error" variant="tonal" class="mb-4" closable @click:close="error = ''">
         {{ error }}
       </v-alert>
-      <v-alert v-if="success" type="success" variant="tonal" class="mb-4" closable @click:close="success = ''">
-        {{ success }}
+
+      <v-alert v-if="inviteLink" type="success" variant="tonal" class="mb-4" closable @click:close="inviteLink = ''">
+        Invitation sent. If the email doesn't arrive, share this link directly:
+        <div class="mt-2">
+          <a :href="inviteLink" target="_blank" class="text-break">{{ inviteLink }}</a>
+        </div>
       </v-alert>
 
       <v-text-field
@@ -33,7 +37,7 @@ const emit = defineEmits(['invited'])
 const email = ref('')
 const loading = ref(false)
 const error = ref('')
-const success = ref('')
+const inviteLink = ref('')
 
 async function handleSubmit() {
   if (!email.value) {
@@ -42,11 +46,12 @@ async function handleSubmit() {
   }
 
   error.value = ''
-  success.value = ''
+  inviteLink.value = ''
   loading.value = true
   try {
-    await sendInvitation(email.value, 'STUDENT')
-    success.value = `Invitation sent to ${email.value}.`
+    const response = await sendInvitation(email.value, 'STUDENT')
+    const token = response.data.data
+    inviteLink.value = `${window.location.origin}/register?token=${token}`
     emit('invited', email.value)
     email.value = ''
   } catch (err) {
