@@ -42,16 +42,29 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useAuthStore } from '../stores/auth'
 
 const drawer = ref(true)
+const authStore = useAuthStore()
 
-const navItems = [
-  { title: 'Dashboard', to: '/dashboard', icon: 'mdi-view-dashboard-outline' },
-  { title: 'Sections', to: '/sections', icon: 'mdi-google-classroom' },
-  { title: 'Teams', to: '/teams', icon: 'mdi-account-group-outline' },
-  { title: 'Rubrics', to: '/rubrics', icon: 'mdi-clipboard-text-outline' },
-  { title: 'Students', to: '/students', icon: 'mdi-school-outline' },
-  { title: 'Reports', to: '/reports', icon: 'mdi-file-chart-outline' },
-]
+const navItems = computed(() => {
+  if (authStore.role === 'STUDENT') {
+    return [
+      { title: 'Dashboard', to: '/student/dashboard', icon: 'mdi-view-dashboard-outline' },
+      { title: 'Peer Evaluation', to: '/student/peer-eval', icon: 'mdi-message-star-outline' },
+      { title: 'My Report', to: '/student/report', icon: 'mdi-file-chart-outline' },
+      { title: 'Weekly Activity Report', to: '/student/war', icon: 'mdi-clipboard-text-outline' },
+      { title: 'Account', to: '/student/account', icon: 'mdi-account-circle-outline' },
+    ]
+  }
+  return [
+    { title: 'Dashboard', to: '/dashboard', icon: 'mdi-view-dashboard-outline' },
+    { title: 'Sections', to: '/sections', icon: 'mdi-google-classroom' },
+    { title: 'Teams', to: '/teams', icon: 'mdi-account-group-outline' },
+    { title: 'Rubrics', to: '/rubrics', icon: 'mdi-clipboard-text-outline' },
+    { title: 'Students', to: '/students', icon: 'mdi-school-outline' },
+    { title: 'Reports', to: '/reports', icon: 'mdi-file-chart-outline' },
+  ]
+})
 </script>
