@@ -16,7 +16,7 @@
         <v-tab v-for="teammate in teammates" :key="teammate.id" :value="teammate.id">
           {{ teammate.name }}
           <v-icon
-            v-if="submitted.includes(teammate.id)"
+            v-if="submissions[teammate.id]"
             icon="mdi-check-circle"
             color="success"
             size="18"
@@ -27,7 +27,13 @@
 
       <v-window v-model="activeTab">
         <v-window-item v-for="teammate in teammates" :key="teammate.id" :value="teammate.id">
+          <PeerEvalSubmittedSummary
+            v-if="submissions[teammate.id]"
+            :submission="submissions[teammate.id]"
+            :criteria="criteria"
+          />
           <PeerEvalForm
+            v-else
             :teammate="teammate"
             :criteria="criteria"
             :week-id="weekId"
@@ -42,17 +48,29 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import PeerEvalForm from '../../components/PeerEvalForm.vue'
+import PeerEvalSubmittedSummary from '../../components/PeerEvalSubmittedSummary.vue'
 import { getMyTeam } from '../../api/teams'
 import { getActiveWeeksBySection } from '../../api/activeWeeks'
 import { getRubrics } from '../../api/rubric'
+import { getMySubmissions } from '../../api/peerEval'
 
 const weekId = ref(null)
 const teammates = ref([])
 const criteria = ref([])
+const submissions = ref({})
 const loading = ref(true)
 const error = ref('')
 const activeTab = ref(null)
-const submitted = ref([])
+
+async function loadSubmissions() {
+  if (!weekId.value) return
+  const res = await getMySubmissions(weekId.value)
+  const map = {}
+  for (const sub of res.data.data) {
+    map[sub.evaluateeId] = sub
+  }
+  submissions.value = map
+}
 
 onMounted(async () => {
   try {
@@ -75,6 +93,8 @@ onMounted(async () => {
     }))
     criteria.value = rubrics[0]?.criteria ?? []
 
+    await loadSubmissions()
+
     if (teammates.value.length > 0) {
       activeTab.value = teammates.value[0].id
     }
@@ -85,9 +105,7 @@ onMounted(async () => {
   }
 })
 
-function onSubmitted(teammateId) {
-  if (!submitted.value.includes(teammateId)) {
-    submitted.value.push(teammateId)
-  }
+async function onSubmitted() {
+  await loadSubmissions()
 }
 </script>

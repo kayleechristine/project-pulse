@@ -77,4 +77,8 @@ public class PeerEvaluationService {
     public List<PeerEvaluation> getEvaluationsSubmitted(Integer evaluatorId) {
         return evalRepository.findByEvaluatorId(evaluatorId);
     }
+
+    public List<PeerEvaluation> getSubmittedForWeek(Integer evaluatorId, Integer weekId) {
+        return evalRepository.findByEvaluatorIdAndWeekId(evaluatorId, weekId);
+    }
 }
