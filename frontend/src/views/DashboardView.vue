@@ -18,11 +18,22 @@
       </div>
     </div>
 
+    <v-alert
+      v-if="error"
+      type="error"
+      variant="tonal"
+      class="mb-4"
+    >
+      {{ error }}
+    </v-alert>
+
     <v-row>
       <v-col cols="12" md="3">
         <v-card rounded="xl" elevation="1" class="pa-4">
           <div class="text-overline">Sections</div>
-          <div class="text-h3 font-weight-bold">4</div>
+          <div class="text-h3 font-weight-bold">
+            {{ loading ? '...' : sectionCount }}
+          </div>
           <div class="text-body-1 text-medium-emphasis">Active academic sections</div>
         </v-card>
       </v-col>
@@ -30,7 +41,9 @@
       <v-col cols="12" md="3">
         <v-card rounded="xl" elevation="1" class="pa-4">
           <div class="text-overline">Teams</div>
-          <div class="text-h3 font-weight-bold">18</div>
+          <div class="text-h3 font-weight-bold">
+            {{ loading ? '...' : teamCount }}
+          </div>
           <div class="text-body-1 text-medium-emphasis">Senior design teams</div>
         </v-card>
       </v-col>
@@ -38,7 +51,9 @@
       <v-col cols="12" md="3">
         <v-card rounded="xl" elevation="1" class="pa-4">
           <div class="text-overline">Students</div>
-          <div class="text-h3 font-weight-bold">92</div>
+          <div class="text-h3 font-weight-bold">
+            {{ studentCount }}
+          </div>
           <div class="text-body-1 text-medium-emphasis">Registered students</div>
         </v-card>
       </v-col>
@@ -46,7 +61,9 @@
       <v-col cols="12" md="3">
         <v-card rounded="xl" elevation="1" class="pa-4">
           <div class="text-overline">Pending Reports</div>
-          <div class="text-h3 font-weight-bold">11</div>
+          <div class="text-h3 font-weight-bold">
+            {{ pendingReports }}
+          </div>
           <div class="text-body-1 text-medium-emphasis">WAR / peer evaluation follow-up</div>
         </v-card>
       </v-col>
@@ -67,7 +84,7 @@
               <v-btn color="primary" variant="tonal" prepend-icon="mdi-clipboard-text-outline" to="/rubrics">
                 Rubrics
               </v-btn>
-              <v-btn color="primary" variant="tonal" prepend-icon="mdi-calendar-week" to="/sections/1/active-weeks">
+              <v-btn color="primary" variant="tonal" prepend-icon="mdi-calendar-week" :to="activeWeeksLink">
                 Active Weeks
               </v-btn>
             </div>
@@ -80,16 +97,18 @@
           <v-card-title class="font-weight-bold">Recent Activity</v-card-title>
           <v-list lines="two">
             <v-list-item
-              title="Section 2025-2026 updated"
-              subtitle="Rubric and active weeks were modified"
+              v-if="sections.length > 0"
+              :title="`Most recent section: ${sections[0].name}`"
+              subtitle="Loaded from backend section data"
             />
             <v-list-item
-              title="Team assignments published"
-              subtitle="Students were assigned to teams"
+              v-if="teams.length > 0"
+              :title="`Most recent team: ${teams[0].name}`"
+              subtitle="Loaded from backend team data"
             />
             <v-list-item
-              title="WAR report generated"
-              subtitle="Instructor report is ready to review"
+              title="Reports"
+              subtitle="Report totals are not connected yet"
             />
           </v-list>
         </v-card>
@@ -99,4 +118,44 @@
 </template>
 
 <script setup>
+import { computed, onMounted, ref } from 'vue'
+import { getSections } from '../api/sections'
+import { getTeams } from '../api/teams'
+
+const sections = ref([])
+const teams = ref([])
+const loading = ref(true)
+const error = ref('')
+
+const sectionCount = computed(() => sections.value.length)
+const teamCount = computed(() => teams.value.length)
+
+// Keep these at 0 unless your backend has student/report endpoints.
+const studentCount = 0
+const pendingReports = 0
+
+const activeWeeksLink = computed(() => {
+  if (sections.value.length > 0) {
+    return `/sections/${sections.value[0].id}/active-weeks`
+  }
+
+  return '/sections'
+})
+
+onMounted(async () => {
+  try {
+    const [sectionData, teamData] = await Promise.all([
+      getSections(),
+      getTeams(),
+    ])
+
+    sections.value = Array.isArray(sectionData) ? sectionData : []
+    teams.value = Array.isArray(teamData) ? teamData : []
+  } catch (err) {
+    console.error(err)
+    error.value = 'Could not load dashboard data. Make sure the backend is running on port 8080.'
+  } finally {
+    loading.value = false
+  }
+})
 </script>
