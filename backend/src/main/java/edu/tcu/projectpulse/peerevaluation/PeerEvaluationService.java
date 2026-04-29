@@ -1,7 +1,12 @@
 package edu.tcu.projectpulse.peerevaluation;
 
+import edu.tcu.projectpulse.activeweek.ActiveWeek;
+import edu.tcu.projectpulse.activeweek.ActiveWeekRepository;
+import edu.tcu.projectpulse.exception.ValidationException;
 import edu.tcu.projectpulse.peerevaluation.dto.PeerEvaluationRequest;
 import edu.tcu.projectpulse.peerevaluation.dto.ScoreEntry;
+import edu.tcu.projectpulse.team.Team;
+import edu.tcu.projectpulse.team.TeamRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,15 +17,34 @@ import java.util.List;
 public class PeerEvaluationService {
 
     private final PeerEvaluationRepository evalRepository;
+    private final TeamRepository teamRepository;
+    private final ActiveWeekRepository activeWeekRepository;
 
-    public PeerEvaluationService(PeerEvaluationRepository evalRepository) {
+    public PeerEvaluationService(PeerEvaluationRepository evalRepository,
+                                 TeamRepository teamRepository,
+                                 ActiveWeekRepository activeWeekRepository) {
         this.evalRepository = evalRepository;
+        this.teamRepository = teamRepository;
+        this.activeWeekRepository = activeWeekRepository;
     }
 
     @Transactional
     public PeerEvaluation submit(Integer evaluatorId, PeerEvaluationRequest request) {
-        // TODO: validate evaluatee is a teammate (needs TeamMemberRepository)
-        // TODO: validate weekId is the previous active week (needs ActiveWeekRepository)
+        if (evaluatorId.equals(request.getEvaluateeId())) {
+            throw new ValidationException("You cannot evaluate yourself.");
+        }
+
+        Team team = teamRepository.findByStudentId(evaluatorId)
+                .orElseThrow(() -> new ValidationException("You are not assigned to a team."));
+        if (!team.getStudentIds().contains(request.getEvaluateeId())) {
+            throw new ValidationException("You can only evaluate members of your own team.");
+        }
+
+        ActiveWeek week = activeWeekRepository.findById(Long.valueOf(request.getWeekId()))
+                .orElseThrow(() -> new ValidationException("The specified week does not exist."));
+        if (!week.isActive()) {
+            throw new ValidationException("Peer evaluations can only be submitted for active weeks.");
+        }
 
         PeerEvaluation eval = evalRepository
                 .findByEvaluatorIdAndEvaluateeIdAndWeekId(
