@@ -1,5 +1,6 @@
 package edu.tcu.projectpulse.report;
 
+import edu.tcu.projectpulse.team.TeamMemberRepository;
 import edu.tcu.projectpulse.war.WarActivity;
 import edu.tcu.projectpulse.war.WarActivityRepository;
 import org.springframework.stereotype.Service;
@@ -12,14 +13,18 @@ import java.util.stream.Collectors;
 public class WarReportService {
 
     private final WarActivityRepository warActivityRepository;
+    private final TeamMemberRepository teamMemberRepository;
 
-    public WarReportService(WarActivityRepository warActivityRepository) {
+    public WarReportService(WarActivityRepository warActivityRepository,
+                            TeamMemberRepository teamMemberRepository) {
         this.warActivityRepository = warActivityRepository;
+        this.teamMemberRepository = teamMemberRepository;
     }
 
     public Map<String, Object> buildTeamWarReport(Integer teamId, Integer weekId) {
-        // TODO: replace stub with real team member lookup (needs TeamMemberRepository)
-        List<Integer> teamMemberIds = List.of();
+        List<Integer> teamMemberIds = teamMemberRepository.findByTeamId(teamId).stream()
+                .map(m -> m.getStudentId())
+                .collect(Collectors.toList());
 
         List<Map<String, Object>> entries = teamMemberIds.stream()
                 .map(studentId -> {
