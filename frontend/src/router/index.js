@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 import AuthLayout from '../layouts/AuthLayout.vue'
 import MainLayout from '../layouts/MainLayout.vue'
 import LoginView from '../views/LoginView.vue'
@@ -90,15 +91,26 @@ const routes = [
       { path: 'instructors', component: InstructorsView },
       { path: 'instructors/invite', component: InviteInstructorView },
       { path: 'instructors/:id', component: InstructorDetailView },
-      { path: 'reports', component: TeamWarReportView },
-      { path: 'reports/section-peer-eval', component: SectionReportView },
-      { path: 'reports/student-peer-eval', component: StudentPeerReportView },
-      { path: 'reports/student-war', component: StudentWarReportView }
+      { path: 'reports', component: TeamWarReportView, meta: { roles: ['INSTRUCTOR'] } },
+      { path: 'reports/section-peer-eval', component: SectionReportView, meta: { roles: ['INSTRUCTOR'] } },
+      { path: 'reports/student-peer-eval', component: StudentPeerReportView, meta: { roles: ['INSTRUCTOR'] } },
+      { path: 'reports/student-war', component: StudentWarReportView, meta: { roles: ['INSTRUCTOR'] } }
     ]
   }
 ]
 
-export default createRouter({
+const router = createRouter({
   history: createWebHistory(),
   routes
 })
+
+router.beforeEach((to) => {
+  if (to.meta.roles) {
+    const auth = useAuthStore()
+    if (!to.meta.roles.includes(auth.role)) {
+      return '/dashboard'
+    }
+  }
+})
+
+export default router

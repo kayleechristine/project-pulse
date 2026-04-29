@@ -98,6 +98,12 @@ const navItems = computed(() => {
       { title: 'Weekly Activity Report', to: '/student/war', icon: 'mdi-clipboard-text-outline' },
     ]
   }
+  if (authStore.role === 'INSTRUCTOR') {
+    return [
+      { title: 'Dashboard', to: '/dashboard', icon: 'mdi-view-dashboard-outline' },
+      { title: 'Reports', to: '/reports', icon: 'mdi-file-chart-outline' },
+    ]
+  }
   return [
     { title: 'Dashboard', to: '/dashboard', icon: 'mdi-view-dashboard-outline' },
     { title: 'Sections', to: '/sections', icon: 'mdi-google-classroom' },
@@ -105,7 +111,6 @@ const navItems = computed(() => {
     { title: 'Rubrics', to: '/rubrics', icon: 'mdi-clipboard-text-outline' },
     { title: 'Students', to: '/students', icon: 'mdi-school-outline' },
     { title: 'Instructors', to: '/instructors', icon: 'mdi-account-tie-outline' },
-    { title: 'Reports', to: '/reports', icon: 'mdi-file-chart-outline' },
   ]
 })
 </script>
