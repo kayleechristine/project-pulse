@@ -71,7 +71,7 @@ const evalBadge = computed(() => {
   if (submitted === total) {
     return { label: 'Complete', color: 'success', icon: 'mdi-check' }
   }
-  return { label: `${submitted} / ${total} submitted`, color: 'warning', icon: 'mdi-alert-circle-outline' }
+  return { label: `${submitted} / ${total} submitted`, color: 'error', icon: 'mdi-alert-circle-outline' }
 })
 
 onMounted(async () => {

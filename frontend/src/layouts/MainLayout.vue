@@ -29,7 +29,26 @@
       <v-app-bar-nav-icon @click="drawer = !drawer" />
       <v-toolbar-title class="font-weight-bold">Project Pulse</v-toolbar-title>
       <v-spacer />
-      <v-btn variant="text" prepend-icon="mdi-account-circle-outline">Profile</v-btn>
+      <v-menu>
+        <template #activator="{ props }">
+          <v-btn variant="text" prepend-icon="mdi-account-circle-outline" v-bind="props">
+            {{ authStore.user?.firstName }} {{ authStore.user?.lastName }}
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item
+            v-if="authStore.role === 'STUDENT'"
+            to="/student/account"
+            prepend-icon="mdi-cog-outline"
+            title="Account Settings"
+          />
+          <v-list-item
+            prepend-icon="mdi-logout"
+            title="Logout"
+            @click="handleLogout"
+          />
+        </v-list>
+      </v-menu>
     </v-app-bar>
 
     <v-main class="bg-background">
@@ -42,10 +61,17 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
 const drawer = ref(true)
 const authStore = useAuthStore()
+const router = useRouter()
+
+function handleLogout() {
+  authStore.logout()
+  router.push('/login')
+}
 
 const navItems = computed(() => {
   if (authStore.role === 'STUDENT') {
@@ -54,7 +80,6 @@ const navItems = computed(() => {
       { title: 'Peer Evaluation', to: '/student/peer-eval', icon: 'mdi-message-star-outline' },
       { title: 'My Report', to: '/student/report', icon: 'mdi-file-chart-outline' },
       { title: 'Weekly Activity Report', to: '/student/war', icon: 'mdi-clipboard-text-outline' },
-      { title: 'Account', to: '/student/account', icon: 'mdi-account-circle-outline' },
     ]
   }
   return [
