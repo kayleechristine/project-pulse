@@ -1,5 +1,9 @@
 import api from '../plugins/axios'
 
+export function getTeams() {
+  return api.get('/api/teams')
+}
+
 export function getMyTeam() {
   return api.get('/api/teams/my-team')
 }
