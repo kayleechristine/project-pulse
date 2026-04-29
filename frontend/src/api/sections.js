@@ -1,4 +1,9 @@
-const API_BASE_URL = 'http://localhost:8080/api/sections'
+const API_BASE_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/sections`
+
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem('token')
+  return token ? { Authorization: `Bearer ${token}`, ...extra } : { ...extra }
+}
 
 async function handleResponse(response, errorMessage) {
   if (!response.ok) {
@@ -16,21 +21,19 @@ async function handleResponse(response, errorMessage) {
 }
 
 export async function getSections() {
-  const response = await fetch(API_BASE_URL)
+  const response = await fetch(API_BASE_URL, { headers: authHeaders() })
   return handleResponse(response, 'Failed to fetch sections')
 }
 
 export async function getSection(id) {
-  const response = await fetch(`${API_BASE_URL}/${id}`)
+  const response = await fetch(`${API_BASE_URL}/${id}`, { headers: authHeaders() })
   return handleResponse(response, 'Failed to fetch section')
 }
 
 export async function createSection(section) {
   const response = await fetch(API_BASE_URL, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(section),
   })
 
@@ -40,9 +43,7 @@ export async function createSection(section) {
 export async function updateSection(id, section) {
   const response = await fetch(`${API_BASE_URL}/${id}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(section),
   })
 
@@ -52,6 +53,7 @@ export async function updateSection(id, section) {
 export async function deleteSection(id) {
   const response = await fetch(`${API_BASE_URL}/${id}`, {
     method: 'DELETE',
+    headers: authHeaders(),
   })
 
   return handleResponse(response, 'Failed to delete section')

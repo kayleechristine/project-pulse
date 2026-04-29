@@ -1,7 +1,12 @@
-const API_URL = 'http://localhost:8080/api/rubrics'
+const API_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/rubrics`
+
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem('token')
+  return token ? { Authorization: `Bearer ${token}`, ...extra } : { ...extra }
+}
 
 export async function getRubrics() {
-  const response = await fetch(API_URL)
+  const response = await fetch(API_URL, { headers: authHeaders() })
 
   if (!response.ok) {
     throw new Error('Failed to fetch rubrics')
@@ -11,7 +16,7 @@ export async function getRubrics() {
 }
 
 export async function getRubric(id) {
-  const response = await fetch(`${API_URL}/${id}`)
+  const response = await fetch(`${API_URL}/${id}`, { headers: authHeaders() })
 
   if (!response.ok) {
     throw new Error('Failed to fetch rubric')
@@ -23,7 +28,7 @@ export async function getRubric(id) {
 export async function createRubric(rubric) {
   const response = await fetch(API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(rubric),
   })
 
@@ -37,7 +42,7 @@ export async function createRubric(rubric) {
 export async function updateRubric(id, rubric) {
   const response = await fetch(`${API_URL}/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(rubric),
   })
 

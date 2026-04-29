@@ -1,4 +1,9 @@
-const TEAM_API_URL = 'http://localhost:8080/api/teams'
+const TEAM_API_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api/teams`
+
+function authHeaders(extra = {}) {
+  const token = localStorage.getItem('token')
+  return token ? { Authorization: `Bearer ${token}`, ...extra } : { ...extra }
+}
 
 async function handleResponse(response, errorMessage) {
   if (!response.ok) {
@@ -14,19 +19,19 @@ async function handleResponse(response, errorMessage) {
 }
 
 export async function getTeams() {
-  const response = await fetch(TEAM_API_URL)
+  const response = await fetch(TEAM_API_URL, { headers: authHeaders() })
   return handleResponse(response, 'Failed to fetch teams')
 }
 
 export async function getTeam(id) {
-  const response = await fetch(`${TEAM_API_URL}/${id}`)
+  const response = await fetch(`${TEAM_API_URL}/${id}`, { headers: authHeaders() })
   return handleResponse(response, 'Failed to fetch team')
 }
 
 export async function createTeam(team) {
   const response = await fetch(TEAM_API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(team),
   })
 
@@ -36,7 +41,7 @@ export async function createTeam(team) {
 export async function updateTeam(id, team) {
   const response = await fetch(`${TEAM_API_URL}/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(team),
   })
 
@@ -46,6 +51,7 @@ export async function updateTeam(id, team) {
 export async function deleteTeam(id) {
   const response = await fetch(`${TEAM_API_URL}/${id}`, {
     method: 'DELETE',
+    headers: authHeaders(),
   })
 
   return handleResponse(response, 'Failed to delete team')
@@ -64,7 +70,7 @@ export async function getMyTeam() {
 export async function assignStudentsToTeam(teamId, studentIds) {
   const response = await fetch(`${TEAM_API_URL}/${teamId}/students`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(studentIds),
   })
   
@@ -77,6 +83,7 @@ export async function assignStudentsToTeam(teamId, studentIds) {
 export async function removeStudentFromTeam(teamId, studentId) {
   const response = await fetch(`${TEAM_API_URL}/${teamId}/students/${studentId}`, {
     method: 'DELETE',
+    headers: authHeaders(),
   })
 
   return handleResponse(response, 'Failed to remove student from team')
