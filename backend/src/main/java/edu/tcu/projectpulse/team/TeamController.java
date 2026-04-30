@@ -1,11 +1,13 @@
 package edu.tcu.projectpulse.team;
 
 import edu.tcu.projectpulse.exception.ResourceNotFoundException;
+import edu.tcu.projectpulse.exception.ValidationException;
 import edu.tcu.projectpulse.instructor.InstructorAssignmentService;
 import edu.tcu.projectpulse.shared.Result;
 import edu.tcu.projectpulse.shared.StatusCode;
 import edu.tcu.projectpulse.user.User;
 import edu.tcu.projectpulse.user.UserRepository;
+import edu.tcu.projectpulse.user.UserRole;
 import edu.tcu.projectpulse.user.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -116,6 +118,7 @@ public class TeamController {
     }
 
     @PostMapping("/{teamId}/students")
+    @PreAuthorize("hasRole('ADMIN')")
     public Team assignStudentsToTeam(@PathVariable Long teamId, @RequestBody StudentAssignmentRequest request) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new IllegalArgumentException("Team not found"));
@@ -124,17 +127,40 @@ public class TeamController {
             throw new IllegalArgumentException("At least one student is required");
         }
 
+        request.studentIds().forEach(this::validateStudent);
+        request.studentIds().forEach(studentId -> moveStudentToTeam(studentId, team));
         team.getStudentIds().addAll(request.studentIds());
         return teamRepository.save(team);
     }
 
     @DeleteMapping("/{teamId}/students/{studentId}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Team removeStudentFromTeam(@PathVariable Long teamId, @PathVariable Integer studentId) {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new IllegalArgumentException("Team not found"));
 
         team.getStudentIds().remove(studentId);
         return teamRepository.save(team);
+    }
+
+    private void validateStudent(Integer studentId) {
+        User student = userRepository.findById(studentId)
+                .orElseThrow(() -> new ValidationException("Student not found"));
+
+        if (!student.hasRole(UserRole.STUDENT)) {
+            throw new ValidationException("User is not a student");
+        }
+    }
+
+    private void moveStudentToTeam(Integer studentId, Team destinationTeam) {
+        List<Team> currentTeams = teamRepository.findAllByStudentId(studentId);
+
+        currentTeams.stream()
+                .filter(existingTeam -> !existingTeam.getId().equals(destinationTeam.getId()))
+                .forEach(existingTeam -> {
+                    existingTeam.getStudentIds().remove(studentId);
+                    teamRepository.save(existingTeam);
+                });
     }
 
     @PostMapping("/{teamId}/instructors")

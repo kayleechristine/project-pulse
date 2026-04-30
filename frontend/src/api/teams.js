@@ -9,7 +9,16 @@ function authHeaders(extra = {}) {
 
 async function handleResponse(response, errorMessage) {
   if (!response.ok) {
-    throw new Error(errorMessage)
+    let message = errorMessage
+
+    try {
+      const errorData = await response.json()
+      message = errorData.message || errorData.error || message
+    } catch {
+      // Keep the caller-provided fallback message when the response has no JSON body.
+    }
+
+    throw new Error(message)
   }
 
   if (response.status === 204) {
@@ -65,13 +74,10 @@ export function getMyTeam() {
 
 export async function assignStudentsToTeam(teamId, studentIds) {
   const response = await fetch(`${TEAM_API_URL}/${teamId}/students`, {
-    method: 'PUT',
+    method: 'POST',
     headers: authHeaders({ 'Content-Type': 'application/json' }),
-    body: JSON.stringify(studentIds),
+    body: JSON.stringify({ studentIds }),
   })
-  
-
-  
 
   return handleResponse(response, 'Failed to assign students to team')
 }
@@ -88,7 +94,7 @@ export async function removeStudentFromTeam(teamId, studentId) {
 export async function assignInstructorsToTeam(teamId, instructorIds) {
   const response = await fetch(`${TEAM_API_URL}/${teamId}/instructors`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ instructorIds }),
   })
 
@@ -98,6 +104,7 @@ export async function assignInstructorsToTeam(teamId, instructorIds) {
 export async function removeInstructorFromTeam(teamId, instructorId) {
   const response = await fetch(`${TEAM_API_URL}/${teamId}/instructors/${instructorId}`, {
     method: 'DELETE',
+    headers: authHeaders(),
   })
 
   return handleResponse(response, 'Failed to remove instructor from team')

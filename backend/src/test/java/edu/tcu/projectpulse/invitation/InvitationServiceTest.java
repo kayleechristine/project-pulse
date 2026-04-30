@@ -31,6 +31,9 @@ class InvitationServiceTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private InvitationEmailService invitationEmailService;
+
     @InjectMocks
     private InvitationService invitationService;
 
@@ -64,6 +67,7 @@ class InvitationServiceTest {
         assertThat(saved.getToken()).isNotBlank();
         assertThat(saved.getExpiresAt()).isAfter(Instant.now());
         assertThat(result).isEqualTo(validToken);
+        verify(invitationEmailService).sendInvitation(validToken);
     }
 
     @Test

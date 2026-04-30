@@ -30,6 +30,7 @@ public class InstructorAssignmentService {
         }
 
         instructorIds.forEach(this::validateInstructor);
+        instructorIds.forEach(instructorId -> moveInstructorToTeam(instructorId, team));
         team.getInstructorIds().addAll(instructorIds);
         return teamRepository.save(team);
     }
@@ -49,5 +50,14 @@ public class InstructorAssignmentService {
         if (!instructor.hasRole(UserRole.INSTRUCTOR)) {
             throw new ValidationException("User is not an instructor");
         }
+    }
+
+    private void moveInstructorToTeam(Integer instructorId, Team destinationTeam) {
+        teamRepository.findAllByInstructorId(instructorId).stream()
+                .filter(existingTeam -> !existingTeam.getId().equals(destinationTeam.getId()))
+                .forEach(existingTeam -> {
+                    existingTeam.getInstructorIds().remove(instructorId);
+                    teamRepository.save(existingTeam);
+                });
     }
 }

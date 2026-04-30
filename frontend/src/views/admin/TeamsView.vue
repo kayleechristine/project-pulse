@@ -35,7 +35,7 @@
             <td>{{ team.websiteUrl || 'N/A' }}</td>
             <td class="text-right">
               <v-btn size="small" variant="text" :to="`/teams/${team.id}`">
-                View
+                Manage
               </v-btn>
               <v-btn size="small" variant="text" :to="`/teams/${team.id}/edit`">
                 Edit
