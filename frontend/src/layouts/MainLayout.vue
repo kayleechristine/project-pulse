@@ -101,6 +101,8 @@ const navItems = computed(() => {
   if (authStore.role === 'INSTRUCTOR') {
     return [
       { title: 'Dashboard', to: '/dashboard', icon: 'mdi-view-dashboard-outline' },
+      { title: 'Teams', to: '/teams', icon: 'mdi-account-group-outline' },
+      { title: 'Students', to: '/students', icon: 'mdi-school-outline' },
       { title: 'Reports', to: '/reports', icon: 'mdi-file-chart-outline' },
     ]
   }
