@@ -7,18 +7,37 @@
       </div>
     </div>
 
-    <v-alert v-if="error" type="error" variant="tonal" class="mb-4">
-      {{ error }}
-    </v-alert>
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" location="bottom" timeout="4000">
+      {{ snackbar.message }}
+    </v-snackbar>
 
     <v-card v-if="team" rounded="xl" elevation="1" class="pa-6">
-      <div class="text-h4 font-weight-bold mb-2">{{ team.name }}</div>
-      <div class="text-body-1 mb-4">{{ team.description }}</div>
-
-      <div class="mb-2">
-        <strong>Website:</strong>
-        <span class="ml-2">{{ team.websiteUrl || 'N/A' }}</span>
-      </div>
+      <v-text-field
+        v-model="editName"
+        label="Team Name"
+        variant="outlined"
+        density="comfortable"
+        class="mb-3"
+        hide-details
+      />
+      <v-textarea
+        v-model="editDescription"
+        label="Description"
+        variant="outlined"
+        density="comfortable"
+        rows="2"
+        auto-grow
+        class="mb-3"
+        hide-details
+      />
+      <v-text-field
+        v-model="editWebsiteUrl"
+        label="Website URL"
+        variant="outlined"
+        density="comfortable"
+        class="mb-4"
+        hide-details
+      />
 
       <v-divider class="my-6" />
 
@@ -95,7 +114,7 @@
       </v-table>
 
       <div class="d-flex ga-2 mt-6">
-        <v-btn color="primary" :to="`/teams/${team.id}/edit`">Edit Team</v-btn>
+        <v-btn color="primary" :loading="saving" @click="saveTeam">Save</v-btn>
         <v-btn color="error" variant="tonal" @click="removeTeam">Delete Team</v-btn>
         <v-btn variant="outlined" to="/teams">Back</v-btn>
       </div>
@@ -117,6 +136,7 @@ import {
   getTeam,
   removeInstructorFromTeam,
   removeStudentFromTeam,
+  updateTeam,
 } from '../../api/teams'
 import { searchInstructors } from '../../api/instructors'
 import { searchStudents } from '../../api/students'
@@ -125,7 +145,15 @@ const route = useRoute()
 const router = useRouter()
 
 const team = ref(null)
-const error = ref('')
+const saving = ref(false)
+const snackbar = ref({ show: false, message: '', color: 'success' })
+
+function notify(message, color = 'success') {
+  snackbar.value = { show: true, message, color }
+}
+const editName = ref('')
+const editDescription = ref('')
+const editWebsiteUrl = ref('')
 const instructors = ref([])
 const students = ref([])
 const selectedStudentIds = ref([])
@@ -144,8 +172,29 @@ const availableInstructors = computed(() => {
 async function loadTeam() {
   try {
     team.value = await getTeam(route.params.id)
+    editName.value = team.value.name ?? ''
+    editDescription.value = team.value.description ?? ''
+    editWebsiteUrl.value = team.value.websiteUrl ?? ''
   } catch (err) {
-    error.value = err.message
+    notify(err.message, 'error')
+  }
+}
+
+async function saveTeam() {
+  saving.value = true
+  try {
+    const updated = await updateTeam(route.params.id, {
+      sectionId: team.value.sectionId,
+      name: editName.value,
+      description: editDescription.value,
+      websiteUrl: editWebsiteUrl.value,
+    })
+    team.value = { ...team.value, ...updated }
+    router.push('/teams')
+  } catch (err) {
+    notify(err.message, 'error')
+  } finally {
+    saving.value = false
   }
 }
 
@@ -190,28 +239,24 @@ async function assignInstructors() {
     team.value = await assignInstructorsToTeam(route.params.id, selectedInstructorIds.value)
     selectedInstructorIds.value = []
   } catch (err) {
-    error.value = err.message
+    notify(err.message, 'error')
   }
 }
 
 async function assignStudents() {
-  error.value = ''
-
   try {
     team.value = await assignStudentsToTeam(route.params.id, selectedStudentIds.value)
     selectedStudentIds.value = []
   } catch (err) {
-    error.value = err.message
+    notify(err.message, 'error')
   }
 }
 
 async function removeStudent(studentId) {
-  error.value = ''
-
   try {
     team.value = await removeStudentFromTeam(route.params.id, studentId)
   } catch (err) {
-    error.value = err.message
+    notify(err.message, 'error')
   }
 }
 
@@ -219,7 +264,7 @@ async function removeInstructor(instructorId) {
   try {
     team.value = await removeInstructorFromTeam(route.params.id, instructorId)
   } catch (err) {
-    error.value = err.message
+    notify(err.message, 'error')
   }
 }
 
@@ -233,7 +278,7 @@ async function removeTeam() {
     alert('Team deleted successfully')
     router.push('/teams')
   } catch (err) {
-    error.value = err.message
+    notify(err.message, 'error')
   }
 }
 
