@@ -13,9 +13,9 @@ export function getInstructor(id) {
 }
 
 export function deactivateInstructor(id) {
-  return api.patch(`/api/instructors/${id}/deactivate`)
+  return api.put(`/api/instructors/${id}/deactivate`)
 }
 
 export function reactivateInstructor(id) {
-  return api.patch(`/api/instructors/${id}/reactivate`)
+  return api.put(`/api/instructors/${id}/reactivate`)
 }

@@ -9,11 +9,11 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -47,12 +47,12 @@ public class InstructorController {
         return new Result(true, StatusCode.SUCCESS, "Instructor details retrieved", instructorService.view(id));
     }
 
-    @PatchMapping("/{id}/deactivate")
+    @RequestMapping(value = "/{id}/deactivate", method = {RequestMethod.PATCH, RequestMethod.PUT})
     public Result deactivate(@PathVariable Integer id) {
         return new Result(true, StatusCode.SUCCESS, "Instructor deactivated", summary(instructorService.deactivate(id)));
     }
 
-    @PatchMapping("/{id}/reactivate")
+    @RequestMapping(value = "/{id}/reactivate", method = {RequestMethod.PATCH, RequestMethod.PUT})
     public Result reactivate(@PathVariable Integer id) {
         return new Result(true, StatusCode.SUCCESS, "Instructor reactivated", summary(instructorService.reactivate(id)));
     }
