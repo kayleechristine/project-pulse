@@ -2,10 +2,13 @@ package edu.tcu.projectpulse.auth;
 
 import edu.tcu.projectpulse.auth.dto.LoginRequest;
 import edu.tcu.projectpulse.exception.ValidationException;
+import edu.tcu.projectpulse.invitation.InvitationService;
+import edu.tcu.projectpulse.invitation.InvitationToken;
 import edu.tcu.projectpulse.shared.Result;
 import edu.tcu.projectpulse.shared.StatusCode;
 import edu.tcu.projectpulse.user.User;
 import edu.tcu.projectpulse.user.UserRole;
+import edu.tcu.projectpulse.user.dto.RegisterRequest;
 import edu.tcu.projectpulse.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,10 +23,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -36,6 +42,9 @@ class AuthServiceTest {
 
     @Mock
     private JwtTokenProvider jwtTokenProvider;
+
+    @Mock
+    private InvitationService invitationService;
 
     @InjectMocks
     private AuthService authService;
@@ -119,5 +128,31 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.login(loginRequest))
                 .isInstanceOf(ValidationException.class)
                 .hasMessageContaining("not active");
+    }
+
+    @Test
+    void should_RegisterInstructor_When_InvitationIsValid() {
+        InvitationToken token = new InvitationToken();
+        token.setToken("valid-token");
+        token.setEmail("instructor@tcu.edu");
+        token.setRole(UserRole.INSTRUCTOR);
+        token.setCreatedAt(Instant.now());
+        token.setExpiresAt(Instant.now().plusSeconds(3600));
+
+        RegisterRequest request = new RegisterRequest();
+        request.setToken("valid-token");
+        request.setFirstName("Ada");
+        request.setLastName("Lovelace");
+        request.setPassword("password123");
+
+        given(invitationService.validateToken("valid-token")).willReturn(token);
+        given(userService.findByEmail("instructor@tcu.edu")).willReturn(Optional.empty());
+        given(passwordEncoder.encode("password123")).willReturn("hashed-password");
+        given(userService.save(any(User.class))).willAnswer(inv -> inv.getArgument(0));
+
+        Result result = authService.register(request);
+
+        assertThat(result.isFlag()).isTrue();
+        verify(invitationService).markUsed("valid-token");
     }
 }

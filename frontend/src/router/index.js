@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 import AuthLayout from '../layouts/AuthLayout.vue'
 import MainLayout from '../layouts/MainLayout.vue'
 import LoginView from '../views/LoginView.vue'
@@ -22,8 +23,15 @@ import RubricFormView from '../views/admin/RubricFormView.vue'
 import ActiveWeeksView from '../views/admin/ActiveWeeksView.vue'
 import InviteStudentView from '../views/admin/InviteStudentView.vue'
 import StudentsView from '../views/admin/StudentsView.vue'
+import StudentDetailView from '../views/admin/StudentDetailView.vue'
+import InviteInstructorView from '../views/admin/InviteInstructorView.vue'
+import InstructorsView from '../views/admin/InstructorsView.vue'
+import InstructorDetailView from '../views/admin/InstructorDetailView.vue'
 import TeamStudentsView from '../views/admin/TeamStudentsView.vue'
 import TeamWarReportView from '../views/instructor/TeamWarReportView.vue'
+import SectionReportView from '../views/instructor/SectionReportView.vue'
+import StudentPeerReportView from '../views/instructor/StudentPeerReportView.vue'
+import StudentWarReportView from '../views/instructor/StudentWarReportView.vue'
 
 const PlaceholderView = {
   template: `
@@ -79,12 +87,30 @@ const routes = [
 
       { path: 'students', component: StudentsView },
       { path: 'students/invite', component: InviteStudentView },
-      { path: 'reports', component: TeamWarReportView }
+      { path: 'students/:id', component: StudentDetailView },
+      { path: 'instructors', component: InstructorsView },
+      { path: 'instructors/invite', component: InviteInstructorView },
+      { path: 'instructors/:id', component: InstructorDetailView },
+      { path: 'reports', component: TeamWarReportView, meta: { roles: ['INSTRUCTOR'] } },
+      { path: 'reports/section-peer-eval', component: SectionReportView, meta: { roles: ['INSTRUCTOR'] } },
+      { path: 'reports/student-peer-eval', component: StudentPeerReportView, meta: { roles: ['INSTRUCTOR'] } },
+      { path: 'reports/student-war', component: StudentWarReportView, meta: { roles: ['INSTRUCTOR'] } }
     ]
   }
 ]
 
-export default createRouter({
+const router = createRouter({
   history: createWebHistory(),
   routes
 })
+
+router.beforeEach((to) => {
+  if (to.meta.roles) {
+    const auth = useAuthStore()
+    if (!to.meta.roles.includes(auth.role)) {
+      return '/dashboard'
+    }
+  }
+})
+
+export default router

@@ -1,10 +1,12 @@
 package edu.tcu.projectpulse.team;
 
 import edu.tcu.projectpulse.exception.ResourceNotFoundException;
+import edu.tcu.projectpulse.instructor.InstructorAssignmentService;
 import edu.tcu.projectpulse.shared.Result;
 import edu.tcu.projectpulse.shared.StatusCode;
 import edu.tcu.projectpulse.user.User;
 import edu.tcu.projectpulse.user.UserRepository;
+import edu.tcu.projectpulse.user.UserRole;
 import edu.tcu.projectpulse.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,8 +24,11 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class TeamControllerTest {
@@ -37,6 +42,9 @@ class TeamControllerTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private InstructorAssignmentService instructorAssignmentService;
+
     @InjectMocks
     private TeamController teamController;
 
@@ -47,7 +55,7 @@ class TeamControllerTest {
     @BeforeEach
     void setUp() {
         mockPrincipal = mock(UserDetails.class);
-        given(mockPrincipal.getUsername()).willReturn("student@tcu.edu");
+        lenient().when(mockPrincipal.getUsername()).thenReturn("student@tcu.edu");
 
         student = new User();
         student.setId(1);
@@ -123,5 +131,36 @@ class TeamControllerTest {
         assertThatThrownBy(() -> teamController.getMyTeam(mockPrincipal))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Team");
+    }
+
+    @Test
+    void should_AssignInstructorToTeam_When_InstructorExists() {
+        User instructor = new User();
+        instructor.setId(20);
+        instructor.addRole(UserRole.INSTRUCTOR);
+
+        team.setInstructorIds(new java.util.HashSet<>(Set.of(20)));
+        given(instructorAssignmentService.assign(1L, Set.of(20))).willReturn(team);
+
+        Team result = teamController.assignInstructorsToTeam(
+                1L,
+                new TeamController.InstructorAssignmentRequest(Set.of(20))
+        );
+
+        assertThat(result.getInstructorIds()).contains(20);
+        verify(instructorAssignmentService).assign(1L, Set.of(20));
+    }
+
+    @Test
+    void should_RemoveInstructorFromTeam() {
+        team.setInstructorIds(new java.util.HashSet<>(Set.of(20, 21)));
+
+        Team updated = new Team();
+        updated.setInstructorIds(new java.util.HashSet<>(Set.of(21)));
+        given(instructorAssignmentService.remove(1L, 20)).willReturn(updated);
+
+        Team result = teamController.removeInstructorFromTeam(1L, 20);
+
+        assertThat(result.getInstructorIds()).containsExactly(21);
     }
 }

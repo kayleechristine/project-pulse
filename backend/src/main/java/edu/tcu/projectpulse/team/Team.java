@@ -24,12 +24,25 @@ public class Team {
     @Column(name = "student_id")
     private java.util.Set<Integer> studentIds = new java.util.HashSet<>();
 
+    @ElementCollection
+    @CollectionTable(name = "team_instructors", joinColumns = @JoinColumn(name = "team_id"))
+    @Column(name = "instructor_id")
+    private java.util.Set<Integer> instructorIds = new java.util.HashSet<>();
+
     public java.util.Set<Integer> getStudentIds() {
         return studentIds;
     }
     
     public void setStudentIds(java.util.Set<Integer> studentIds) {
         this.studentIds = studentIds;
+    }
+
+    public java.util.Set<Integer> getInstructorIds() {
+        return instructorIds;
+    }
+
+    public void setInstructorIds(java.util.Set<Integer> instructorIds) {
+        this.instructorIds = instructorIds;
     }
     
     public Long getId() {

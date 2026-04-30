@@ -3,6 +3,12 @@
     <div class="text-h5 font-weight-bold mb-1">Team WAR Report</div>
     <div class="text-body-2 text-medium-emphasis mb-6">View a team's weekly activity report.</div>
 
+    <div class="d-flex ga-2 mb-6 flex-wrap">
+      <v-btn variant="tonal" color="primary" to="/reports/section-peer-eval">Section Peer Eval</v-btn>
+      <v-btn variant="tonal" color="primary" to="/reports/student-peer-eval">Student Peer Eval</v-btn>
+      <v-btn variant="tonal" color="primary" to="/reports/student-war">Student WAR</v-btn>
+    </div>
+
     <div class="d-flex ga-4 mb-6 flex-wrap">
       <v-select
         v-model="selectedTeamId"

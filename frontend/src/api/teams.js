@@ -84,3 +84,21 @@ export async function removeStudentFromTeam(teamId, studentId) {
 
   return handleResponse(response, 'Failed to remove student from team')
 }
+
+export async function assignInstructorsToTeam(teamId, instructorIds) {
+  const response = await fetch(`${TEAM_API_URL}/${teamId}/instructors`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ instructorIds }),
+  })
+
+  return handleResponse(response, 'Failed to assign instructors to team')
+}
+
+export async function removeInstructorFromTeam(teamId, instructorId) {
+  const response = await fetch(`${TEAM_API_URL}/${teamId}/instructors/${instructorId}`, {
+    method: 'DELETE',
+  })
+
+  return handleResponse(response, 'Failed to remove instructor from team')
+}

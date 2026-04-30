@@ -25,7 +25,7 @@ public class InvitationController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public Result createInvitation(@RequestBody @Valid InviteRequest request) {
-        InvitationToken token = invitationService.generateToken(request.getEmail(), request.getRole());
+        InvitationToken token = invitationService.generateToken(request.getEmail(), request.getRole(), request.getSectionId());
         return new Result(true, StatusCode.SUCCESS, "Invitation created", token.getToken());
     }
 
