@@ -74,9 +74,9 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { createRubric } from '../../api/rubric'
+import { createRubric, getRubric, updateRubric } from '../../api/rubric'
 
 const props = defineProps({
   id: String,
@@ -91,6 +91,23 @@ const form = ref({
   criteria: [
     { name: '', description: '', maxScore: 10 },
   ],
+})
+
+onMounted(async () => {
+  if (!isEdit.value) return
+  try {
+    const rubric = await getRubric(props.id)
+    form.value = {
+      name: rubric.name,
+      criteria: rubric.criteria.map(c => ({
+        name: c.name,
+        description: c.description,
+        maxScore: c.maxScore,
+      })),
+    }
+  } catch {
+    error.value = 'Failed to load rubric.'
+  }
 })
 
 function addCriterion() {
@@ -131,8 +148,11 @@ async function saveRubric() {
   }
 
   try {
-    await createRubric(form.value)
-    alert('Rubric saved successfully')
+    if (isEdit.value) {
+      await updateRubric(props.id, form.value)
+    } else {
+      await createRubric(form.value)
+    }
     router.push('/rubrics')
   } catch (err) {
     error.value = err.message

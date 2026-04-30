@@ -77,7 +77,7 @@ onMounted(async () => {
     const [teamRes, rubricRes] = await Promise.all([getMyTeam(), getRubrics()])
 
     const teamData = teamRes.data.data
-    const rubrics = rubricRes.data
+    const rubrics = rubricRes
 
     const weeksRes = await getActiveWeeksBySection(teamData.sectionId)
     const activeWeek = weeksRes.data.find(w => w.active)

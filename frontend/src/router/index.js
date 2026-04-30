@@ -84,6 +84,7 @@ const routes = [
 
       { path: 'rubrics', component: RubricsView },
       { path: 'rubrics/new', component: RubricFormView },
+      { path: 'rubrics/:id/edit', component: RubricFormView, props: true },
 
       { path: 'students', component: StudentsView },
       { path: 'students/invite', component: InviteStudentView },

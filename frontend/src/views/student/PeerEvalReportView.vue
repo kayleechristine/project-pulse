@@ -66,7 +66,7 @@ onMounted(async () => {
     const [teamRes, rubricRes] = await Promise.all([getMyTeam(), getRubrics()])
 
     const teamData = teamRes.data.data
-    const rubrics = rubricRes.data
+    const rubrics = rubricRes
 
     criteria.value = rubrics[0]?.criteria ?? []
 
