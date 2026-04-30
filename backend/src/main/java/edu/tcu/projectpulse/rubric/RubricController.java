@@ -8,7 +8,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/rubrics")
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174"})
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:5174", "https://orange-pebble-06afc810f.7.azurestaticapps.net"})
 public class RubricController {
 
     private final RubricRepository rubricRepository;
@@ -22,15 +22,57 @@ public class RubricController {
         return rubricRepository.findAll();
     }
 
+    @GetMapping("/{id}")
+    public Rubric getRubric(@PathVariable Long id) {
+        return rubricRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Rubric not found"));
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Rubric createRubric(@RequestBody Rubric rubric) {
-        if (rubric.getName() == null || rubric.getName().isBlank()) {
-            throw new IllegalArgumentException("Rubric name is required");
-        }
+        validateRubric(rubric);
 
         if (rubricRepository.findByNameIgnoreCase(rubric.getName()).isPresent()) {
             throw new IllegalArgumentException("Rubric name already exists");
+        }
+
+        rubric.setName(rubric.getName().trim());
+
+        for (RubricCriterion criterion : rubric.getCriteria()) {
+            criterion.setRubric(rubric);
+        }
+
+        return rubricRepository.save(rubric);
+    }
+
+    @PutMapping("/{id}")
+    public Rubric updateRubric(@PathVariable Long id, @RequestBody Rubric request) {
+        validateRubric(request);
+
+        Rubric rubric = rubricRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Rubric not found"));
+
+        rubricRepository.findByNameIgnoreCase(request.getName()).ifPresent(existing -> {
+            if (!existing.getId().equals(id)) {
+                throw new IllegalArgumentException("Rubric name already exists");
+            }
+        });
+
+        rubric.setName(request.getName().trim());
+        rubric.getCriteria().clear();
+
+        for (RubricCriterion criterion : request.getCriteria()) {
+            criterion.setRubric(rubric);
+            rubric.getCriteria().add(criterion);
+        }
+
+        return rubricRepository.save(rubric);
+    }
+
+    private void validateRubric(Rubric rubric) {
+        if (rubric.getName() == null || rubric.getName().isBlank()) {
+            throw new IllegalArgumentException("Rubric name is required");
         }
 
         if (rubric.getCriteria() == null || rubric.getCriteria().isEmpty()) {
@@ -49,12 +91,7 @@ public class RubricController {
             if (criterion.getMaxScore() == null || criterion.getMaxScore() <= 0) {
                 throw new IllegalArgumentException("Criterion max score must be positive");
             }
-
-            criterion.setRubric(rubric);
         }
-
-        rubric.setName(rubric.getName().trim());
-        return rubricRepository.save(rubric);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
