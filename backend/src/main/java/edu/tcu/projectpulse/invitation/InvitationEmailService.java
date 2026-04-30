@@ -1,6 +1,5 @@
 package edu.tcu.projectpulse.invitation;
 
-import edu.tcu.projectpulse.exception.ValidationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
@@ -8,10 +7,14 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.net.URLEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.nio.charset.StandardCharsets;
 
 @Service
 public class InvitationEmailService {
+
+    private static final Logger log = LoggerFactory.getLogger(InvitationEmailService.class);
 
     private final JavaMailSender mailSender;
     private final String frontendBaseUrl;
@@ -44,7 +47,7 @@ public class InvitationEmailService {
         try {
             mailSender.send(message);
         } catch (MailException ex) {
-            throw new ValidationException("Invitation token was created, but the email could not be sent. Check the mail server configuration.");
+            log.warn("Failed to send invitation email to {}: {}", invitationToken.getEmail(), ex.getMessage());
         }
     }
 
