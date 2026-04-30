@@ -5,6 +5,7 @@ import edu.tcu.projectpulse.exception.ValidationException;
 import edu.tcu.projectpulse.user.UserRole;
 import edu.tcu.projectpulse.user.UserService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -17,16 +18,21 @@ public class InvitationService {
 
     private final InvitationTokenRepository tokenRepository;
     private final UserService userService;
+    private final InvitationEmailService invitationEmailService;
 
-    public InvitationService(InvitationTokenRepository tokenRepository, UserService userService) {
+    public InvitationService(InvitationTokenRepository tokenRepository,
+                             UserService userService,
+                             InvitationEmailService invitationEmailService) {
         this.tokenRepository = tokenRepository;
         this.userService = userService;
+        this.invitationEmailService = invitationEmailService;
     }
 
     public InvitationToken generateToken(String email, UserRole role) {
         return generateToken(email, role, null);
     }
 
+    @Transactional
     public InvitationToken generateToken(String email, UserRole role, Long sectionId) {
         if (role == UserRole.ADMIN) {
             throw new ValidationException("Cannot send invitations for the ADMIN role");
@@ -45,7 +51,9 @@ public class InvitationService {
         token.setExpiresAt(Instant.now().plus(TOKEN_TTL));
         token.setUsed(false);
 
-        return tokenRepository.save(token);
+        InvitationToken savedToken = tokenRepository.save(token);
+        invitationEmailService.sendInvitation(savedToken);
+        return savedToken;
     }
 
     public InvitationToken validateToken(String rawToken) {

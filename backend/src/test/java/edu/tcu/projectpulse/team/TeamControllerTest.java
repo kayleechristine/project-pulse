@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -162,5 +163,65 @@ class TeamControllerTest {
         Team result = teamController.removeInstructorFromTeam(1L, 20);
 
         assertThat(result.getInstructorIds()).containsExactly(21);
+    }
+
+    @Test
+    void should_AssignStudentsToTeam_When_RequestContainsStudentIds() {
+        Team existing = teamWithId(1L);
+        existing.setStudentIds(new java.util.HashSet<>(Set.of(1)));
+
+        User studentTwo = studentWithId(2);
+        User studentThree = studentWithId(3);
+        given(teamRepository.findById(1L)).willReturn(Optional.of(existing));
+        given(userRepository.findById(2)).willReturn(Optional.of(studentTwo));
+        given(userRepository.findById(3)).willReturn(Optional.of(studentThree));
+        given(teamRepository.findAllByStudentId(2)).willReturn(List.of());
+        given(teamRepository.findAllByStudentId(3)).willReturn(List.of());
+        given(teamRepository.save(existing)).willReturn(existing);
+
+        Team result = teamController.assignStudentsToTeam(
+                1L,
+                new TeamController.StudentAssignmentRequest(Set.of(2, 3))
+        );
+
+        assertThat(result.getStudentIds()).containsExactlyInAnyOrder(1, 2, 3);
+        verify(teamRepository).save(existing);
+    }
+
+    @Test
+    void should_MoveStudentToTeam_When_StudentAlreadyBelongsToAnotherTeam() {
+        Team oldTeam = teamWithId(1L);
+        oldTeam.setStudentIds(new java.util.HashSet<>(Set.of(2, 9)));
+
+        Team newTeam = teamWithId(2L);
+        newTeam.setStudentIds(new java.util.HashSet<>(Set.of(4)));
+
+        given(teamRepository.findById(2L)).willReturn(Optional.of(newTeam));
+        given(userRepository.findById(2)).willReturn(Optional.of(studentWithId(2)));
+        given(teamRepository.findAllByStudentId(2)).willReturn(List.of(oldTeam));
+        given(teamRepository.save(any(Team.class))).willAnswer(invocation -> invocation.getArgument(0));
+
+        Team result = teamController.assignStudentsToTeam(
+                2L,
+                new TeamController.StudentAssignmentRequest(Set.of(2))
+        );
+
+        assertThat(oldTeam.getStudentIds()).containsExactly(9);
+        assertThat(result.getStudentIds()).containsExactlyInAnyOrder(2, 4);
+        verify(teamRepository).save(oldTeam);
+        verify(teamRepository).save(newTeam);
+    }
+
+    private User studentWithId(Integer id) {
+        User student = new User();
+        student.setId(id);
+        student.addRole(UserRole.STUDENT);
+        return student;
+    }
+
+    private Team teamWithId(Long id) {
+        Team team = new Team();
+        ReflectionTestUtils.setField(team, "id", id);
+        return team;
     }
 }

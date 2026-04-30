@@ -15,7 +15,7 @@
     </v-alert>
 
     <v-card class="pa-4 mb-6">
-      <h2 class="mb-4">Assign Students</h2>
+      <h2 class="mb-4">Add or Move Students</h2>
 
       <v-select
         v-model="selectedStudentIds"
@@ -28,7 +28,7 @@
       />
 
       <v-btn color="primary" class="mt-4" @click="assignStudents">
-        Assign Students
+        Add / Move Students
       </v-btn>
     </v-card>
 
@@ -65,8 +65,8 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import api from '../../plugins/axios'
 import { getTeam, assignStudentsToTeam, removeStudentFromTeam } from '../../api/teams'
+import { searchStudents } from '../../api/students'
 
 const route = useRoute()
 
@@ -96,16 +96,12 @@ async function loadData() {
   error.value = ''
 
   try {
-    const teamResponse = await getTeam(teamId.value)
-    team.value = teamResponse.data
+    team.value = await getTeam(teamId.value)
 
-    const studentsResponse = await api.get('/api/users')
-    students.value = studentsResponse.data.filter(user => {
-      const roles = user.roles || []
-      return roles.includes('STUDENT') || roles.includes('ROLE_STUDENT')
-    })
+    const studentsResponse = await searchStudents('')
+    students.value = studentsResponse.data.data
   } catch (err) {
-    error.value = err.response?.data?.error || 'Failed to load team students.'
+    error.value = err.message || 'Failed to load team students.'
   }
 }
 
@@ -119,12 +115,11 @@ async function assignStudents() {
   }
 
   try {
-    const response = await assignStudentsToTeam(teamId.value, selectedStudentIds.value)
-    team.value = response.data
+    team.value = await assignStudentsToTeam(teamId.value, selectedStudentIds.value)
     selectedStudentIds.value = []
     success.value = 'Students assigned successfully.'
   } catch (err) {
-    error.value = err.response?.data?.error || 'Failed to assign students.'
+    error.value = err.message || 'Failed to assign students.'
   }
 }
 
@@ -133,11 +128,10 @@ async function removeStudent(studentId) {
   success.value = ''
 
   try {
-    const response = await removeStudentFromTeam(teamId.value, studentId)
-    team.value = response.data
+    team.value = await removeStudentFromTeam(teamId.value, studentId)
     success.value = 'Student removed successfully.'
   } catch (err) {
-    error.value = err.response?.data?.error || 'Failed to remove student.'
+    error.value = err.message || 'Failed to remove student.'
   }
 }
 
